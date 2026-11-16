@@ -1,0 +1,36 @@
+<Window x:Class="Cloudbreak.Views.ToastWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:c="clr-namespace:Cloudbreak.Core"
+        Title="Cloudbreak" Width="352" SizeToContent="Height"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        ResizeMode="NoResize" ShowInTaskbar="False" Topmost="True" ShowActivated="False"
+        FontFamily="{StaticResource UiFont}" Foreground="{DynamicResource InkBrush}"
+        UseLayoutRounding="True" Opacity="0">
+    <Border x:Name="Card" Margin="16" CornerRadius="10" Padding="14,12,14,14" BorderThickness="1"
+            Background="{DynamicResource PaperBrush}" BorderBrush="{DynamicResource LineBrush}">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="26" ShadowDepth="6" Direction="270" Opacity="0.2" Color="{DynamicResource ShadowColor}"/>
+        </Border.Effect>
+        <Border.RenderTransform>
+            <TranslateTransform x:Name="Slide"/>
+        </Border.RenderTransform>
+        <StackPanel>
+            <DockPanel>
+                <Button DockPanel.Dock="Right" Style="{StaticResource TitleButton}" Width="24" Height="20" FontSize="9"
+                        Content="&#xE8BB;" ToolTip="{c:T dismiss}" Click="Dismiss_Click"/>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <c:LogoIcon Width="13" Height="13" Ring="{DynamicResource InkBrush}" Dot="{DynamicResource AccentBrush}"/>
+                    <TextBlock Text="Cloudbreak" Margin="7,0,0,0" FontSize="11.5" Foreground="{DynamicResource MutedBrush}"/>
+                </StackPanel>
+            </DockPanel>
+            <TextBlock x:Name="TitleText" Margin="0,6,0,0" FontSize="14.5" FontWeight="SemiBold"/>
+            <TextBlock x:Name="BodyText" Margin="0,3,0,0" FontSize="13" TextWrapping="Wrap" Foreground="{DynamicResource MutedBrush}"/>
+            <Grid x:Name="Actions" Margin="0,12,0,0">
+                <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="6"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                <Button x:Name="SkipBtn" Style="{StaticResource SmallButton}" Content="{c:T skipBreak}" Click="Skip_Click"/>
+                <Button Grid.Column="2" Style="{StaticResource SmallButton}" Content="{c:T dismiss}" Click="Dismiss_Click"/>
+            </Grid>
+        </StackPanel>
+    </Border>
+</Window>

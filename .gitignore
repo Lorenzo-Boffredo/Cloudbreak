@@ -1,0 +1,15 @@
+# Build output (recreated by build\build.ps1)
+bin/
+obj/
+publish/
+
+# The installer is published on the GitHub Releases page, not in the repository
+Setup/
+
+# Editor and OS files
+.vs/
+.vscode/
+*.user
+*.suo
+Thumbs.db
+desktop.ini

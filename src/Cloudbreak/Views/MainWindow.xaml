@@ -1,0 +1,142 @@
+﻿<Window x:Class="Cloudbreak.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:c="clr-namespace:Cloudbreak.Core"
+        xmlns:v="clr-namespace:Cloudbreak.Views"
+        Title="Cloudbreak" Width="372" SizeToContent="Height"
+        WindowStyle="None" ResizeMode="CanMinimize" WindowStartupLocation="CenterScreen" Icon="/cloudbreak.ico"
+        Background="{DynamicResource PaperBrush}" Foreground="{DynamicResource InkBrush}"
+        FontFamily="{StaticResource UiFont}" FontSize="14"
+        UseLayoutRounding="True" SnapsToDevicePixels="True">
+
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="36" ResizeBorderThickness="0" GlassFrameThickness="0,0,0,1"
+                      CornerRadius="0" UseAeroCaptionButtons="False"/>
+    </WindowChrome.WindowChrome>
+
+    <Window.Resources>
+        <SolidColorBrush x:Key="PhaseBrush" Color="#2A2E37"/>
+        <SolidColorBrush x:Key="PhaseSoftBrush" Color="#E3E5EA"/>
+    </Window.Resources>
+
+    <Border x:Name="Root">
+        <Grid ClipToBounds="True">
+            <!-- Soft vapor glow, only during a break -->
+            <Ellipse x:Name="Vapor" Width="360" Height="270" Margin="0,30,0,0"
+                     HorizontalAlignment="Center" VerticalAlignment="Top" Opacity="0" IsHitTestVisible="False">
+                <Ellipse.Fill>
+                    <RadialGradientBrush>
+                        <GradientStop x:Name="VaporIn" Offset="0" Color="#5C7A64DA"/>
+                        <GradientStop x:Name="VaporMid" Offset="0.55" Color="#267A64DA"/>
+                        <GradientStop x:Name="VaporOut" Offset="1" Color="#007A64DA"/>
+                    </RadialGradientBrush>
+                </Ellipse.Fill>
+                <Ellipse.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform x:Name="VaporScale" CenterX="180" CenterY="135"/>
+                        <TranslateTransform x:Name="VaporMove"/>
+                    </TransformGroup>
+                </Ellipse.RenderTransform>
+            </Ellipse>
+
+            <StackPanel>
+                <!-- Title bar -->
+                <Grid Height="36">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="12,0,0,0">
+                        <c:LogoIcon Width="14" Height="14" Ring="{DynamicResource InkBrush}" Dot="{DynamicResource AccentBrush}"/>
+                        <TextBlock Text="Cloudbreak" Margin="8,0,0,0" FontSize="12" Foreground="{DynamicResource MutedBrush}"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2" Orientation="Horizontal">
+                        <Button x:Name="SettingsBtn" Style="{StaticResource TitleButton}" Content="&#xE713;" FontSize="12"
+                                ToolTip="{c:T settings}" AutomationProperties.Name="{c:T settings}" Click="Settings_Click"/>
+                        <Button x:Name="PinBtn" Style="{StaticResource TitleButton}" Content="&#xE718;" FontSize="12"
+                                ToolTip="{c:T pin}" AutomationProperties.Name="{c:T pin}" Click="Pin_Click"/>
+                        <Button Style="{StaticResource TitleButton}" Content="&#xE921;" ToolTip="{c:T minimize}" AutomationProperties.Name="{c:T minimize}" Click="Min_Click"/>
+                        <Button Style="{StaticResource CloseTitleButton}" Content="&#xE8BB;" ToolTip="{c:T close}" AutomationProperties.Name="{c:T close}" Click="Close_Click"/>
+                    </StackPanel>
+                </Grid>
+
+                <StackPanel Margin="24,6,24,22">
+                    <!-- Phase + round -->
+                    <Grid>
+                        <Border x:Name="Pill" CornerRadius="11" Padding="9,2,11,5" HorizontalAlignment="Left"
+                                Background="{DynamicResource PhaseSoftBrush}">
+                            <StackPanel Orientation="Horizontal">
+                                <Ellipse x:Name="PillDot" Width="7" Height="7" VerticalAlignment="Center"
+                                         Fill="{DynamicResource PhaseBrush}" Stroke="{DynamicResource PhaseBrush}" StrokeThickness="1.5"/>
+                                <TextBlock x:Name="PhaseText" Margin="7,0,0,0" FontSize="13" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource PhaseBrush}" Text="Hold"/>
+                            </StackPanel>
+                        </Border>
+                        <TextBlock x:Name="RoundText" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                   FontSize="12.5" Foreground="{DynamicResource MutedBrush}"/>
+                    </Grid>
+
+                    <!-- Timer -->
+                    <TextBlock x:Name="TimerText" Margin="-5,14,0,0" Text="25:00"
+                               FontFamily="{StaticResource DisplayFont}" FontSize="96" FontWeight="Light"
+                               Typography.NumeralAlignment="Tabular" LineStackingStrategy="BlockLineHeight" LineHeight="94"/>
+                    <TextBlock x:Name="HintText" Margin="0,8,0,0" FontSize="14" TextWrapping="Wrap"
+                               Foreground="{DynamicResource MutedBrush}"/>
+
+                    <!-- Progress -->
+                    <Grid Height="3" Margin="0,20,0,0">
+                        <Border CornerRadius="1.5" Background="{DynamicResource TrackBrush}"/>
+                        <Border CornerRadius="1.5" Background="{DynamicResource PhaseBrush}" RenderTransformOrigin="0,0.5">
+                            <Border.RenderTransform>
+                                <ScaleTransform x:Name="BarScale" ScaleX="0"/>
+                            </Border.RenderTransform>
+                        </Border>
+                    </Grid>
+
+                    <!-- Controls -->
+                    <WrapPanel Margin="0,20,0,0">
+                        <Button x:Name="PrimaryBtn" Style="{StaticResource PrimaryButton}" Content="Pause" Click="Primary_Click"/>
+                        <Button x:Name="SkipBtn" Style="{StaticResource SecondaryButton}" Margin="8,0,0,0"
+                                Content="{c:T skipBreak}" Click="Skip_Click" Visibility="Collapsed"/>
+                        <Button x:Name="StopBtn" Style="{StaticResource GhostButton}" Margin="8,0,0,0"
+                                Content="{c:T stop}" Click="Stop_Click"/>
+                    </WrapPanel>
+
+                    <!-- Today -->
+                    <Border Margin="0,20,0,0" Padding="0,18,0,0" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource LineBrush}">
+                        <StackPanel>
+                            <Grid>
+                                <TextBlock Text="{c:T today}" FontSize="12.5" FontWeight="SemiBold"/>
+                                <TextBlock x:Name="RangeText" HorizontalAlignment="Right" FontSize="12.5"
+                                           Foreground="{DynamicResource MutedBrush}"/>
+                            </Grid>
+                            <v:DayStrip x:Name="Strip" Height="48" Margin="0,8,0,0"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Stats -->
+                    <Grid Margin="0,18,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="{c:T holdsDone}" FontSize="12" Foreground="{DynamicResource MutedBrush}"/>
+                            <TextBlock x:Name="HoldsText" FontSize="18" Typography.NumeralAlignment="Tabular"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="{c:T vapeFree}" FontSize="12" Foreground="{DynamicResource MutedBrush}"/>
+                            <TextBlock x:Name="FreeText" FontSize="18" Typography.NumeralAlignment="Tabular"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="{c:T skipped}" FontSize="12" Foreground="{DynamicResource MutedBrush}"/>
+                            <TextBlock x:Name="SkipText" FontSize="18" Typography.NumeralAlignment="Tabular"/>
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>

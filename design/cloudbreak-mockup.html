@@ -1,0 +1,1178 @@
+<title>Cloudbreak</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300..700&family=Geist:wght@200..700&display=swap">
+<style>
+/* Layout: a quiet mist ground with three Windows "windows" on it. Holds are monochrome ink; the only color in the app is the vapor violet of a break. */
+:root {
+  --mist: #E9EBEF;
+  --paper: #F9FAFB;
+  --ink: #1D2027;
+  --muted: #676C78;
+  --line: #D8DBE1;
+  --hold: #2A2E37;
+  --hold-soft: #E3E5EA;
+  --vapor: #7A64DA;
+  --vapor-soft: #ECE7FC;
+  --on-accent: #FFFFFF;
+  --shadow: 0 1px 2px rgba(29,32,39,.06), 0 18px 48px -12px rgba(29,32,39,.18);
+  --f-display: "Bricolage Grotesque", "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif;
+  --f-ui: "Geist", "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --mist: #111317; --paper: #191B21; --ink: #E5E7EC; --muted: #8E93A0; --line: #2A2D35;
+    --hold: #DADDE4; --hold-soft: #262930; --vapor: #B4A6F6; --vapor-soft: #261F40;
+    --on-accent: #111317;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 18px 48px -12px rgba(0,0,0,.6);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --mist: #111317; --paper: #191B21; --ink: #E5E7EC; --muted: #8E93A0; --line: #2A2D35;
+  --hold: #DADDE4; --hold-soft: #262930; --vapor: #B4A6F6; --vapor-soft: #261F40;
+  --on-accent: #111317;
+  --shadow: 0 1px 2px rgba(0,0,0,.4), 0 18px 48px -12px rgba(0,0,0,.6);
+  color-scheme: dark;
+}
+
+/* Accent: Cloudbreak violet by default, or the Windows accent color (preview uses the Windows default blue) */
+:root { --violet: #7A64DA; --win-accent: #0067C0; --win-accent-soft: #E2EEF9; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --violet: #B4A6F6; --win-accent: #4CC2FF; --win-accent-soft: #13283A; }
+}
+:root[data-theme="dark"] { --violet: #B4A6F6; --win-accent: #4CC2FF; --win-accent-soft: #13283A; }
+:root.accent-win { --vapor: var(--win-accent); --vapor-soft: var(--win-accent-soft); }
+
+* { box-sizing: border-box; }
+body {
+  background: var(--mist);
+  color: var(--ink);
+  font-family: var(--f-ui);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+button, input, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; border-radius: 6px; }
+
+.page {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding-block: 56px 72px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid;
+  gap: 48px;
+}
+
+/* ---------- Intro ---------- */
+.intro { display: grid; gap: 18px; max-width: 660px; }
+.brand { display: flex; align-items: center; gap: 10px; font-family: var(--f-display); font-weight: 600; font-size: 20px; letter-spacing: -0.01em; }
+.brand svg { width: 26px; height: 26px; }
+.intro h1 {
+  font-family: var(--f-display);
+  font-weight: 300;
+  font-size: clamp(32px, 5vw, 50px);
+  line-height: 1.06;
+  letter-spacing: -0.025em;
+  margin: 0;
+  text-wrap: balance;
+}
+.intro p { margin: 0; color: var(--muted); font-size: 15.5px; max-width: 60ch; }
+
+/* ---------- Stage ---------- */
+.stage { display: flex; flex-wrap: wrap; gap: 32px; align-items: flex-start; }
+.col { display: grid; gap: 20px; width: min(100%, 372px); }
+.col.extras { width: min(100%, 340px); gap: 28px; }
+
+.win {
+  background: var(--paper);
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--line);
+  overflow: hidden;
+  position: relative;
+}
+.titlebar {
+  height: 36px; display: flex; align-items: center; gap: 8px;
+  padding-left: 12px; font-size: 12px; color: var(--muted);
+  position: relative; z-index: 2;
+}
+.titlebar svg.mark { width: 14px; height: 14px; }
+.tb-actions { margin-left: auto; display: flex; height: 100%; }
+.tb-actions button {
+  width: 44px; height: 100%; display: grid; place-items: center;
+  background: none; border: 0; color: var(--muted);
+}
+.tb-actions button:hover { background: color-mix(in srgb, var(--ink) 7%, transparent); }
+.tb-actions button.close:hover { background: #C42B1C; color: #fff; }
+.tb-actions svg { width: 10px; height: 10px; }
+.tb-actions button.pinned { color: var(--ink); }
+
+/* Phase tint on the main window */
+.win.main { --phase: var(--hold); --phase-soft: var(--hold-soft); transition: background-color .9s ease; }
+.win.main[data-phase="break"] { --phase: var(--vapor); --phase-soft: var(--vapor-soft); background: color-mix(in srgb, var(--vapor-soft) 70%, var(--paper)); }
+.win.main::before {
+  content: ""; position: absolute; z-index: 0;
+  width: 340px; height: 260px; left: 50%; top: 40px; margin-left: -170px;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--vapor) 36%, transparent), transparent);
+  filter: blur(18px);
+  opacity: 0; transition: opacity 1.2s ease;
+  pointer-events: none;
+}
+.win.main[data-phase="break"]::before { opacity: 1; animation: drift 14s ease-in-out infinite alternate; }
+@keyframes drift {
+  from { transform: translate(-22px, 6px) scale(1); }
+  to   { transform: translate(24px, -10px) scale(1.12); }
+}
+
+.main-body { position: relative; z-index: 1; padding: 6px 24px 22px; display: grid; gap: 20px; }
+
+.phase-row { display: flex; align-items: center; justify-content: space-between; }
+.pill {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 4px 11px 4px 9px; border-radius: 999px;
+  background: var(--phase-soft); color: var(--phase);
+  font-weight: 550; font-size: 13px;
+}
+.win.main[data-phase="break"] .pill { background: color-mix(in srgb, var(--vapor) 16%, var(--paper)); }
+.pill i { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.win.main[data-state="paused"] .pill i, .win.main[data-state="idle"] .pill i { background: transparent; box-shadow: inset 0 0 0 1.5px currentColor; }
+.round { font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+.timer-block { display: grid; gap: 6px; }
+.timer {
+  font-family: var(--f-ui);
+  font-weight: 200;
+  font-size: 96px;
+  line-height: .92;
+  letter-spacing: -0.045em;
+  font-variant-numeric: tabular-nums;
+  margin-left: -5px;
+}
+.win.main[data-phase="break"] .timer { color: color-mix(in srgb, var(--vapor) 55%, var(--ink)); }
+.win.main[data-state="paused"] .timer { color: var(--muted); }
+.hint { margin: 0; color: var(--muted); font-size: 14px; min-height: 21px; }
+.hint b { color: var(--ink); font-weight: 550; }
+
+.bar { height: 3px; border-radius: 3px; background: color-mix(in srgb, var(--ink) 9%, transparent); overflow: hidden; }
+.bar > div { height: 100%; width: 0; background: var(--phase); border-radius: 3px; transition: width .25s linear, background-color .9s ease; }
+
+.controls { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn {
+  height: 38px; padding: 0 16px; border-radius: 7px;
+  border: 1px solid var(--line); background: var(--paper);
+  font-weight: 500; font-size: 13.5px;
+}
+.btn:hover { background: color-mix(in srgb, var(--ink) 5%, var(--paper)); }
+.btn.primary { background: var(--phase); border-color: var(--phase); color: var(--on-accent); min-width: 112px; transition: background-color .9s ease, border-color .9s ease; }
+.btn.primary:hover { filter: brightness(1.1); }
+.btn.ghost { border-color: transparent; background: transparent; color: var(--muted); }
+.btn.ghost:hover { color: var(--ink); background: color-mix(in srgb, var(--ink) 6%, transparent); }
+
+/* Day strip */
+.day { display: grid; gap: 8px; padding-top: 18px; border-top: 1px solid var(--line); }
+.day-head { display: flex; justify-content: space-between; font-size: 12.5px; color: var(--muted); }
+.day-head span:first-child { color: var(--ink); font-weight: 550; }
+.strip { position: relative; height: 26px; border-radius: 5px; background: color-mix(in srgb, var(--ink) 5%, transparent); overflow: hidden; }
+.seg { position: absolute; top: 0; bottom: 0; }
+.seg.hold { background: color-mix(in srgb, var(--hold) 30%, var(--paper)); }
+.seg.break { background: var(--vapor); }
+.seg.skipped { background: transparent; }
+.strip .future { position: absolute; top: 0; bottom: 0; right: 0; background: color-mix(in srgb, var(--paper) 66%, transparent); }
+.strip .now { position: absolute; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: var(--ink); }
+.ticks { position: relative; height: 14px; font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.ticks span { position: absolute; transform: translateX(-50%); }
+.ticks span.first { transform: none; }
+.ticks span.last { transform: translateX(-100%); }
+
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 0; }
+.stats div { display: grid; gap: 1px; }
+.stats dt { font-size: 12px; color: var(--muted); }
+.stats dd { margin: 0; font-size: 18px; font-weight: 450; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+
+/* Preview controls (not part of the app) */
+.preview {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px;
+  padding: 10px 12px; border-radius: 9px;
+  border: 1px dashed color-mix(in srgb, var(--ink) 22%, transparent);
+  font-size: 12.5px; color: var(--muted);
+}
+.preview strong { color: var(--ink); font-weight: 550; }
+.seg-ctl { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.seg-ctl button { border: 0; background: transparent; padding: 3px 9px; font-size: 12px; color: var(--muted); }
+.seg-ctl button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+.link-btn { border: 0; background: none; padding: 2px 0; font-size: 12.5px; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: color-mix(in srgb, var(--ink) 35%, transparent); }
+.clock { font-variant-numeric: tabular-nums; margin-left: auto; }
+
+/* ---------- Settings: sidebar + one section at a time (matches the app, 640x540) ---------- */
+.col.wide { width: min(100%, 640px); }
+.st { display: grid; grid-template-columns: 188px minmax(0, 1fr); height: 540px; }
+.st-side {
+  display: flex; flex-direction: column;
+  background: color-mix(in srgb, var(--ink) 5%, var(--paper));
+  border-right: 1px solid var(--line);
+}
+.nav { display: grid; gap: 2px; padding: 14px 10px 0; }
+.nav button {
+  display: flex; align-items: center; gap: 11px; height: 38px; padding: 0 11px;
+  border: 0; border-radius: 7px; background: transparent; color: var(--muted);
+  font-size: 13.5px; text-align: left;
+}
+.nav button:hover { background: color-mix(in srgb, var(--ink) 6%, var(--paper)); color: var(--ink); }
+.nav button[aria-selected="true"] { background: var(--paper); color: var(--ink); font-weight: 600; }
+.nav button svg { width: 16px; height: 16px; flex: none; }
+.nav button[aria-selected="true"] svg { color: var(--vapor); }
+.st-side .note { margin-top: auto; padding: 0 16px 18px 18px; }
+.st-main { display: flex; flex-direction: column; min-width: 0; }
+.st-pages { flex: 1; overflow: auto; padding: 2px 30px 26px; }
+.st-page h2 { font-family: var(--f-display); font-weight: 300; font-size: 24px; letter-spacing: -0.015em; margin: 0 0 18px; }
+.st-page .stack { display: grid; gap: 12px; }
+.divider { height: 1px; background: var(--line); margin: 18px 0; }
+.round-bar { display: flex; gap: 3px; height: 10px; margin-bottom: 8px; }
+.round-bar .h { background: color-mix(in srgb, var(--hold) 30%, var(--paper)); border-radius: 5px 2px 2px 5px; transition: flex-grow .25s ease; }
+.round-bar .b { background: var(--vapor); border-radius: 2px 5px 5px 2px; transition: flex-grow .25s ease; }
+.pos-head { display: flex; justify-content: space-between; font-size: 12.5px; color: var(--muted); }
+.opts { display: grid; gap: 8px; }
+.opts.two { grid-template-columns: 1fr 1fr; }
+.opts.three { grid-template-columns: repeat(3, 1fr); }
+.opts.three button { justify-content: center; }
+@media (max-width: 640px) {
+  .st { grid-template-columns: 1fr; height: auto; }
+  .st-side { border-right: 0; border-bottom: 1px solid var(--line); }
+  .nav { display: flex; padding: 0 8px 8px; overflow-x: auto; }
+  .nav button { flex: none; }
+  .st-side .note { display: none; }
+  .st-pages { padding-inline: 18px; }
+}
+@media (prefers-reduced-motion: reduce) { .round-bar .h, .round-bar .b { transition: none; } }
+
+.row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.row .lbl { display: grid; }
+.row .lbl span { font-size: 13.5px; }
+.row .lbl small { font-size: 12px; color: var(--muted); }
+.stepper { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: 7px; height: 34px; flex: none; }
+.stepper button { width: 32px; height: 100%; border: 0; background: none; color: var(--muted); font-size: 16px; line-height: 1; }
+.stepper button:hover { color: var(--ink); background: color-mix(in srgb, var(--ink) 6%, transparent); }
+.stepper output { min-width: 58px; text-align: center; font-variant-numeric: tabular-nums; font-size: 13.5px; }
+.stepper output b { font-weight: 600; }
+.stepper.break output b { color: var(--vapor); }
+.presets { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  border: 1px solid var(--line); background: transparent; border-radius: 999px;
+  padding: 4px 11px; font-size: 12.5px; font-variant-numeric: tabular-nums; color: var(--muted);
+}
+.chip:hover { color: var(--ink); }
+.chip[aria-pressed="true"] { border-color: var(--ink); color: var(--ink); background: color-mix(in srgb, var(--ink) 5%, transparent); }
+
+.switch { appearance: none; -webkit-appearance: none; width: 38px; height: 22px; border-radius: 11px; background: color-mix(in srgb, var(--ink) 32%, transparent); position: relative; cursor: pointer; flex: none; transition: background-color .2s; margin: 0; }
+.switch::after { content: ""; position: absolute; width: 16px; height: 16px; border-radius: 50%; top: 3px; left: 3px; background: var(--paper); box-shadow: 0 1px 2px rgba(0,0,0,.25); transition: transform .2s; }
+.switch:checked { background: var(--vapor); }
+.switch:checked::after { transform: translateX(16px); }
+
+.hours { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+.hours input[type="time"], .select {
+  height: 34px; border: 1px solid var(--line); border-radius: 7px; background: var(--paper);
+  padding: 0 8px; font-size: 13.5px; font-variant-numeric: tabular-nums; min-width: 0;
+}
+.select { padding-right: 4px; }
+.hours.off { opacity: .45; }
+.note { font-size: 12px; color: var(--muted); margin: 0; }
+
+/* ---------- Extras ---------- */
+.extras h2 { margin: 0 0 10px; font-size: 13px; font-weight: 600; }
+.extras p.note { margin-top: 10px; }
+
+/* Windows desktop corner: where notifications appear */
+.desk {
+  border-radius: 10px; overflow: hidden; border: 1px solid var(--line);
+  background:
+    radial-gradient(120% 90% at 0% 0%, color-mix(in srgb, var(--vapor) 10%, transparent), transparent 60%),
+    color-mix(in srgb, var(--ink) 6%, var(--mist));
+  display: grid; grid-template-rows: 1fr auto;
+}
+.desk-area { height: 250px; padding: 12px; display: flex; flex-direction: column; gap: 8px; align-items: flex-end; justify-content: flex-start; }
+.desk[data-corner^="b"] .desk-area { justify-content: flex-end; }
+.desk[data-corner$="l"] .desk-area { align-items: flex-start; }
+.toast.brk { background: color-mix(in srgb, var(--vapor-soft) 75%, var(--paper)); }
+
+/* Position picker: four small screens, each showing where the notification lands */
+.pos { display: grid; gap: 10px; }
+.pos .lbl { display: grid; }
+.pos .lbl span { font-size: 13.5px; }
+.pos .lbl small { font-size: 12px; color: var(--muted); }
+.corner-pick { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.corner-pick button {
+  position: relative; padding: 0; aspect-ratio: 16 / 10; overflow: hidden;
+  border: 1px solid var(--line); border-radius: 7px;
+  background: color-mix(in srgb, var(--ink) 3%, var(--paper));
+  transition: border-color .15s, box-shadow .15s, background-color .15s;
+}
+.corner-pick button::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 5px;
+  background: color-mix(in srgb, var(--ink) 9%, transparent);
+}
+.corner-pick i {
+  position: absolute; width: 38%; height: 22%; border-radius: 2px;
+  background: color-mix(in srgb, var(--ink) 17%, transparent);
+  transition: background-color .15s;
+}
+.corner-pick [data-corner="tl"] i { top: 5px; left: 5px; }
+.corner-pick [data-corner="tr"] i { top: 5px; right: 5px; }
+.corner-pick [data-corner="bl"] i { bottom: 9px; left: 5px; }
+.corner-pick [data-corner="br"] i { bottom: 9px; right: 5px; }
+.corner-pick button:hover { border-color: color-mix(in srgb, var(--ink) 32%, transparent); }
+.corner-pick button:hover i { background: color-mix(in srgb, var(--ink) 30%, transparent); }
+.corner-pick button[aria-checked="true"] {
+  border-color: var(--vapor); box-shadow: 0 0 0 1px var(--vapor);
+  background: color-mix(in srgb, var(--vapor-soft) 55%, var(--paper));
+}
+.corner-pick button[aria-checked="true"] i { background: var(--vapor); }
+
+/* Accent picker */
+.accent-pick button, .opts button {
+  display: flex; align-items: center; gap: 9px; height: 38px; padding: 0 12px;
+  border: 1px solid var(--line); border-radius: 7px; background: transparent;
+  font-size: 13px; color: var(--muted); text-align: left;
+  transition: border-color .15s, box-shadow .15s, color .15s;
+}
+.accent-pick button:hover, .opts button:hover { border-color: color-mix(in srgb, var(--ink) 32%, transparent); color: var(--ink); }
+.accent-pick button[aria-checked="true"], .opts button[aria-checked="true"] { border-color: var(--ink); box-shadow: 0 0 0 1px var(--ink); color: var(--ink); }
+.accent-pick .dot { width: 14px; height: 14px; border-radius: 50%; flex: none; }
+.accent-pick .dot.v { background: var(--violet); }
+.accent-pick .dot.w { background: var(--win-accent); }
+.taskbar {
+  height: 34px; display: flex; align-items: center; justify-content: flex-end; gap: 12px;
+  padding: 0 12px; background: color-mix(in srgb, var(--paper) 82%, transparent);
+  border-top: 1px solid var(--line); font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums;
+}
+.tray-icon { width: 16px; height: 16px; display: grid; place-items: center; color: var(--ink); }
+.tray-icon svg { width: 16px; height: 16px; }
+
+/* Round ring: the long arc is the hold, the short arc is the break; it fills as time passes */
+.ring circle { fill: none; stroke-width: 3.4; stroke-linecap: round; }
+.ring .t-h { stroke: color-mix(in srgb, var(--ink) 24%, transparent); }
+.ring .t-b { stroke: color-mix(in srgb, var(--vapor) 38%, transparent); }
+.ring .p-h { stroke: var(--ink); }
+.ring .p-b { stroke: var(--vapor); }
+.ring .dot { fill: var(--vapor); stroke: none; }
+.ring.idle .p-h, .ring.idle .p-b { stroke: var(--muted); }
+.ring.idle .dot { fill: var(--muted); }
+.ring circle { transition: stroke-dasharray .4s ease, stroke-dashoffset .4s ease; }
+.tray-show { display: flex; align-items: flex-end; gap: 22px; padding: 16px; border-radius: 10px; border: 1px solid var(--line); background: color-mix(in srgb, var(--ink) 6%, var(--mist)); }
+.tray-show figure { margin: 0; display: grid; justify-items: center; gap: 6px; font-size: 11.5px; color: var(--muted); }
+.tray-show .big { width: 56px; height: 56px; }
+.tray-show .small { width: 16px; height: 16px; }
+.tray-show .tbar { display: flex; align-items: center; gap: 10px; height: 34px; padding: 0 12px; border-radius: 6px; background: color-mix(in srgb, var(--paper) 82%, transparent); border: 1px solid var(--line); font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
+@media (prefers-reduced-motion: reduce) { .ring circle { transition: none; } }
+/* App icon preview on the two Windows surfaces (fixed colors: they stand for Windows, not for the page theme) */
+.appicon-show { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.surf { display: flex; align-items: flex-end; justify-content: center; gap: 12px; padding: 16px 10px; border-radius: 10px; border: 1px solid var(--line); }
+.surf.light { background: #F3F3F3; }
+.surf.dark { background: #202020; }
+.surf svg { flex: none; }
+.brand svg { color: var(--ink); }
+.taskbar .clk { text-align: right; line-height: 1.2; }
+
+.toast {
+  width: min(100%, 300px);
+  background: var(--paper); border: 1px solid var(--line); border-radius: 9px; box-shadow: var(--shadow);
+  padding: 12px 14px 12px; display: grid; gap: 4px;
+}
+.toast-app { display: flex; align-items: center; gap: 7px; font-size: 11.5px; color: var(--muted); }
+.toast-app svg { width: 13px; height: 13px; }
+.toast-app .x { margin-left: auto; font-size: 13px; }
+.toast strong { font-size: 14px; font-weight: 600; }
+.toast p { margin: 0; font-size: 13px; color: var(--muted); }
+.toast-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 8px; }
+.toast-actions span { text-align: center; padding: 6px; border-radius: 6px; font-size: 12.5px; background: color-mix(in srgb, var(--ink) 6%, transparent); }
+
+.mini-desk {
+  position: relative; height: 128px; border-radius: 10px; overflow: hidden; border: 1px solid var(--line);
+  background:
+    radial-gradient(120% 90% at 100% 0%, color-mix(in srgb, var(--vapor) 9%, transparent), transparent 60%),
+    color-mix(in srgb, var(--ink) 6%, var(--mist));
+  touch-action: none;
+}
+.mini-desk .mini { position: absolute; left: 14px; top: 14px; cursor: grab; user-select: none; -webkit-user-select: none; white-space: nowrap; }
+.mini-desk .mini.dragging { cursor: grabbing; box-shadow: 0 1px 2px rgba(0,0,0,.08), 0 22px 48px -10px rgba(0,0,0,.3); }
+.mini {
+  display: inline-flex; align-items: center; gap: 9px;
+  padding: 7px 14px 7px 11px; border-radius: 999px;
+  background: var(--paper); border: 1px solid var(--line); box-shadow: var(--shadow);
+  font-size: 13px; font-variant-numeric: tabular-nums;
+}
+.mini i { width: 8px; height: 8px; border-radius: 50%; }.mini.hold i { background: var(--hold); }
+.mini.break i { background: var(--vapor); }
+.mini.break { background: color-mix(in srgb, var(--vapor-soft) 75%, var(--paper)); }
+.mini b { font-weight: 500; }
+.mini span { color: var(--muted); }
+
+.palette { display: flex; gap: 14px; flex-wrap: wrap; }
+.sw { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--muted); }
+.sw i { width: 22px; height: 22px; border-radius: 6px; border: 1px solid var(--line); }
+
+@media (max-width: 420px) {
+  .timer { font-size: 80px; }
+  .main-body { padding-inline: 18px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .win.main[data-phase="break"]::before { animation: none; }
+  .win.main, .bar > div, .btn.primary { transition: none; }
+}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <!-- The Cloudbreak mark: one round. Long arc = hold (25), short violet arc = break (5), violet dot.
+         r 11.5 (circumference 72.26), 5.2 gaps, round caps: arcs shortened by one stroke width. -->
+    <symbol id="logo" viewBox="0 0 32 32">
+      <g fill="none" stroke-width="3.4" stroke-linecap="round" transform="rotate(-90 16 16)">
+        <circle cx="16" cy="16" r="11.5" stroke="currentColor" stroke-dasharray="48.15 72.26" stroke-dashoffset="-1.7"/>
+        <circle cx="16" cy="16" r="11.5" style="stroke: var(--vapor)" stroke-dasharray="6.91 72.26" stroke-dashoffset="-58.45"/>
+      </g>
+      <circle cx="16" cy="16" r="3.6" style="fill: var(--vapor)"/>
+    </symbol>
+    <!-- App icon: the same mark on a dark tile, so it reads on light and dark Windows surfaces -->
+    <symbol id="appicon" viewBox="0 0 32 32">
+      <rect x="0.5" y="0.5" width="31" height="31" rx="7.5" fill="#1C1E24" stroke="#FFFFFF" stroke-opacity="0.08"/>
+      <g transform="translate(2.88 2.88) scale(0.82)">
+        <g fill="none" stroke-width="3.4" stroke-linecap="round" transform="rotate(-90 16 16)">
+          <circle cx="16" cy="16" r="11.5" stroke="#F2F3F5" stroke-dasharray="48.15 72.26" stroke-dashoffset="-1.7"/>
+          <circle cx="16" cy="16" r="11.5" stroke="#B4A6F6" stroke-dasharray="6.91 72.26" stroke-dashoffset="-58.45"/>
+        </g>
+        <circle cx="16" cy="16" r="3.6" fill="#B4A6F6"/>
+      </g>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="page">
+  <header class="intro">
+    <div class="brand"><svg aria-hidden="true"><use href="#logo"/></svg>Cloudbreak</div>
+    <h1 data-i18n="h1">Twenty-five minutes without. Five minutes with.</h1>
+    <p data-i18n="intro">A pomodoro timer for vaping less.</p>
+  </header>
+
+  <section class="stage" aria-label="App mockup">
+    <!-- Main window -->
+    <div class="col">
+      <div class="win main" id="mainWin" data-phase="hold" data-state="running">
+        <div class="titlebar">
+          <svg class="mark" aria-hidden="true" style="color:var(--ink)"><use href="#logo"/></svg>
+          <span>Cloudbreak</span>
+          <div class="tb-actions">
+            <button id="pinBtn" aria-pressed="false" data-i18n-title="pin">
+              <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M3.2 1h3.6M4 1v3.2L2.4 5.8h5.2L6 4.2V1M5 5.8V9.2"/></svg>
+            </button>
+            <button data-i18n-title="minimize"><svg viewBox="0 0 10 10" stroke="currentColor" stroke-width="1.2"><path d="M0 5h10"/></svg></button>
+            <button class="close" data-i18n-title="closeTray"><svg viewBox="0 0 10 10" stroke="currentColor" stroke-width="1.2"><path d="M0 0l10 10M10 0L0 10"/></svg></button>
+          </div>
+        </div>
+
+        <div class="main-body">
+          <div class="phase-row">
+            <span class="pill"><i></i><span id="phaseName">Hold</span></span>
+            <span class="round" id="round"></span>
+          </div>
+
+          <div class="timer-block">
+            <div class="timer" id="timer" role="timer" aria-live="off">25:00</div>
+            <p class="hint" id="hint">&nbsp;</p>
+          </div>
+
+          <div class="bar" aria-hidden="true"><div id="barFill"></div></div>
+
+          <div class="controls">
+            <button class="btn primary" id="primaryBtn">Pause</button>
+            <button class="btn" id="skipBtn" data-i18n="skipBreak" hidden>Skip break</button>
+            <button class="btn ghost" id="stopBtn" data-i18n="stop">Stop</button>
+          </div>
+
+          <div class="day">
+            <div class="day-head"><span data-i18n="today">Today</span><span id="dayRange">09:00–23:00</span></div>
+            <div class="strip" id="strip"></div>
+            <div class="ticks" id="ticks" aria-hidden="true"></div>
+          </div>
+
+          <dl class="stats">
+            <div><dt data-i18n="holdsDone">Holds done</dt><dd id="sHolds">0</dd></div>
+            <div><dt data-i18n="vapeFree">Vape-free</dt><dd id="sFree">0m</dd></div>
+            <div><dt data-i18n="skipped">Breaks skipped</dt><dd id="sSkip">0</dd></div>
+          </dl>
+        </div>
+      </div>
+
+      <div class="preview">
+        <strong data-i18n="preview">Preview</strong>
+        <span class="seg-ctl" role="group" aria-label="Speed">
+          <button data-speed="1" aria-pressed="true">1×</button>
+          <button data-speed="60" aria-pressed="false">60×</button>
+        </span>
+        <span class="seg-ctl" role="group" aria-label="Theme" id="themeCtl">
+          <button data-theme-pick="auto" aria-pressed="true" data-i18n="thAuto">Auto</button>
+          <button data-theme-pick="light" aria-pressed="false" data-i18n="thLight">Light</button>
+          <button data-theme-pick="dark" aria-pressed="false" data-i18n="thDark">Dark</button>
+        </span>
+        <button class="link-btn" id="jumpBtn" data-i18n="jump">Jump to end of phase</button>
+        <span class="clock" id="clock">14:37</span>
+      </div>
+    </div>
+
+    <!-- Settings window -->
+    <div class="col wide">
+      <div class="win st">
+        <aside class="st-side">
+          <div class="titlebar">
+            <svg class="mark" aria-hidden="true" style="color:var(--ink)"><use href="#logo"/></svg>
+            <span>Cloudbreak</span>
+          </div>
+          <nav class="nav" role="tablist" aria-label="Settings sections">
+            <button role="tab" data-page="timer" aria-selected="true">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="9" r="5.5"/><path d="M8 9V6.2M6.4 1.6h3.2M12.3 4.5l1-1"/></svg>
+              <span data-i18n="navTimer">Timer</span>
+            </button>
+            <button role="tab" data-page="alerts" aria-selected="false">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" aria-hidden="true"><path d="M4 11.2V7.6a4 4 0 0 1 8 0v3.6l1.2 1.5H2.8zM6.6 14.4h2.8"/></svg>
+              <span data-i18n="navAlerts">Alerts</span>
+            </button>
+            <button role="tab" data-page="general" aria-selected="false">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" aria-hidden="true"><path d="M2.8 13.2l.9-3.4 7-7 2.5 2.5-7 7zM9.4 4.1l2.5 2.5"/></svg>
+              <span data-i18n="navGeneral">General</span>
+            </button>
+          </nav>
+          <p class="note" data-i18n="applyNow">Changes apply right away.</p>
+        </aside>
+
+        <div class="st-main">
+          <div class="titlebar">
+            <div class="tb-actions">
+              <button class="close" data-i18n-title="close"><svg viewBox="0 0 10 10" stroke="currentColor" stroke-width="1.2"><path d="M0 0l10 10M10 0L0 10"/></svg></button>
+            </div>
+          </div>
+          <div class="st-pages">
+
+          <!-- Timer -->
+          <section class="st-page" data-page="timer">
+            <h2 data-i18n="navTimer">Timer</h2>
+            <div class="round-bar" aria-hidden="true"><i class="h" id="barHold"></i><i class="b" id="barBreak"></i></div>
+            <p class="note" id="roundLen" style="margin-bottom:18px"></p>
+            <div class="stack">
+            <div class="row">
+              <div class="lbl"><span data-i18n="hold">Hold</span><small data-i18n="holdDesc">Time without vaping</small></div>
+              <div class="stepper hold">
+                <button id="holdMinus" aria-label="−5">−</button>
+                <output id="holdVal" aria-live="polite"><b>25</b> min</output>
+                <button id="holdPlus" aria-label="+5">+</button>
+              </div>
+            </div>
+            <div class="row">
+              <div class="lbl"><span data-i18n="break">Break</span><small data-i18n="breakDesc">Time you can vape</small></div>
+              <div class="stepper break">
+                <button id="brkMinus" aria-label="−1">−</button>
+                <output id="brkVal" aria-live="polite"><b>5</b> min</output>
+                <button id="brkPlus" aria-label="+1">+</button>
+              </div>
+            </div>
+            <div class="presets" role="group" aria-label="Presets">
+              <button class="chip" data-h="25" data-b="5">25 / 5</button>
+              <button class="chip" data-h="45" data-b="5">45 / 5</button>
+              <button class="chip" data-h="60" data-b="10">60 / 10</button>
+              <button class="chip" data-h="90" data-b="10">90 / 10</button>
+            </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="stack">
+              <div class="row">
+                <div class="lbl"><span data-i18n="activeHours">Active hours</span><small data-i18n="activeDesc">Only run between these times</small></div>
+                <input type="checkbox" class="switch" id="activeOn" role="switch" checked aria-label="Active hours">
+              </div>
+              <div class="hours" id="hoursRow">
+                <div class="stepper"><button id="startMinus" aria-label="−30">−</button><output id="startVal">09:00</output><button id="startPlus" aria-label="+30">+</button></div>
+                <span>–</span>
+                <div class="stepper"><button id="endMinus" aria-label="−30">−</button><output id="endVal">23:00</output><button id="endPlus" aria-label="+30">+</button></div>
+              </div>
+              <p class="note" id="hoursNote"></p>
+            </div>
+          </section>
+
+          <!-- Alerts -->
+          <section class="st-page" data-page="alerts" hidden>
+            <h2 data-i18n="navAlerts">Alerts</h2>
+            <div class="stack">
+              <div class="row">
+                <div class="lbl"><span data-i18n="notif">Notifications</span><small data-i18n="notifDesc">A message on screen when the phase changes</small></div>
+                <input type="checkbox" class="switch" id="optNotify" role="switch" checked aria-label="Notifications">
+              </div>
+              <div class="pos" id="posBlock">
+                <div class="pos-head"><span data-i18n="posLabel">Position</span><span id="posName">Top right</span></div>
+                <div class="corner-pick" role="radiogroup" aria-label="Position">
+                  <button role="radio" data-corner="tl" aria-checked="false"><i></i></button>
+                  <button role="radio" data-corner="tr" aria-checked="true"><i></i></button>
+                  <button role="radio" data-corner="bl" aria-checked="false"><i></i></button>
+                  <button role="radio" data-corner="br" aria-checked="false"><i></i></button>
+                </div>
+              </div>
+            </div>
+            <div class="divider"></div>
+            <div class="row">
+              <div class="lbl"><span data-i18n="sound">Sound</span><small data-i18n="soundDesc">A soft chime when the phase changes. Works with or without notifications.</small></div>
+              <input type="checkbox" class="switch" id="optSound" role="switch" checked aria-label="Sound">
+            </div>
+            <div class="divider"></div>
+            <div class="row">
+              <div class="lbl"><span data-i18n="mini">Mini timer</span><small data-i18n="miniDesc">Small always-on-top timer</small></div>
+              <input type="checkbox" class="switch" id="optMini" role="switch" checked aria-label="Mini timer">
+            </div>
+          </section>
+
+          <!-- General -->
+          <section class="st-page" data-page="general" hidden>
+            <h2 data-i18n="navGeneral">General</h2>
+            <div class="row">
+              <div class="lbl"><span data-i18n="login">Start with Windows</span><small data-i18n="loginDesc">Opens in the tray when you turn on the PC</small></div>
+              <input type="checkbox" class="switch" id="optLogin" role="switch" checked aria-label="Start with Windows">
+            </div>
+            <div class="divider"></div>
+            <div class="pos">
+              <div class="lbl"><span data-i18n="accent">Accent color</span><small id="accentNote">Cloudbreak violet, used for breaks.</small></div>
+              <div class="opts two accent-pick" role="radiogroup" aria-label="Accent color">
+                <button role="radio" data-accent="violet" aria-checked="true"><i class="dot v"></i><span data-i18n="accViolet">Violet</span></button>
+                <button role="radio" data-accent="windows" aria-checked="false"><i class="dot w"></i><span data-i18n="accWin">Match Windows</span></button>
+              </div>
+            </div>
+            <div class="divider"></div>
+            <div class="pos">
+              <div class="lbl"><span data-i18n="language">Language</span><small data-i18n="langDesc">Automatic follows your Windows language</small></div>
+              <div class="opts three" role="radiogroup" aria-label="Language" id="langSeg">
+                <button role="radio" data-lang="auto" aria-checked="true" data-i18n="langAuto">Automatic</button>
+                <button role="radio" data-lang="en" aria-checked="false">English</button>
+                <button role="radio" data-lang="it" aria-checked="false">Italiano</button>
+              </div>
+            </div>
+          </section>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Extras -->
+    <div class="col extras">
+      <div>
+        <h2 data-i18n="notifications">Notifications</h2>
+        <div class="desk" id="desk" data-corner="tr" aria-label="Windows desktop">
+          <div class="desk-area">
+            <div class="toast brk">
+              <div class="toast-app"><svg aria-hidden="true" style="color:var(--ink)"><use href="#logo"/></svg>Cloudbreak<span class="x" aria-hidden="true">×</span></div>
+              <strong data-i18n="tBreakTitle">Break time</strong>
+              <p id="toastBreak"></p>
+              <div class="toast-actions"><span data-i18n="skipBreak">Skip break</span><span data-i18n="dismiss">Dismiss</span></div>
+            </div>
+            <div class="toast">
+              <div class="toast-app"><svg aria-hidden="true" style="color:var(--ink)"><use href="#logo"/></svg>Cloudbreak<span class="x" aria-hidden="true">×</span></div>
+              <strong data-i18n="tHoldTitle">Break's over</strong>
+              <p id="toastHold"></p>
+            </div>
+          </div>
+          <div class="taskbar">
+            <span class="tray-icon" title="Cloudbreak"><svg class="ring" data-ring viewBox="0 0 32 32" aria-hidden="true"></svg></span>
+            <span class="clk" id="taskClock">14:37<br>16/11/2026</span>
+          </div>
+        </div>
+        <p class="note" data-i18n="notifNote">They appear in the bottom-right corner, above the clock, and stay in the notification center. The Cloudbreak icon sits in the tray next to the clock.</p>
+      </div>
+
+      <div>
+        <h2 data-i18n="appIconTitle">App icon</h2>
+        <div class="appicon-show">
+          <div class="surf light" aria-label="Light Windows surface">
+            <svg width="48" height="48" aria-hidden="true"><use href="#appicon"/></svg>
+            <svg width="32" height="32" aria-hidden="true"><use href="#appicon"/></svg>
+            <svg width="24" height="24" aria-hidden="true"><use href="#appicon"/></svg>
+            <svg width="16" height="16" aria-hidden="true"><use href="#appicon"/></svg>
+          </div>
+          <div class="surf dark" aria-label="Dark Windows surface">
+            <svg width="48" height="48" aria-hidden="true"><use href="#appicon"/></svg>
+            <svg width="32" height="32" aria-hidden="true"><use href="#appicon"/></svg>
+            <svg width="24" height="24" aria-hidden="true"><use href="#appicon"/></svg>
+            <svg width="16" height="16" aria-hidden="true"><use href="#appicon"/></svg>
+          </div>
+        </div>
+        <p class="note" data-i18n="appIconNote">The same ring as the tray icon, on a dark tile so it reads on light and dark Windows. Used for the Start menu, the taskbar, the installer and the desktop shortcut. The small logo inside the app is the same mark without the tile.</p>
+      </div>
+
+      <div>
+        <h2 data-i18n="trayTitle">Tray icon</h2>
+        <div class="tray-show">
+          <figure><svg class="ring big" data-ring viewBox="0 0 32 32" aria-hidden="true"></svg><figcaption data-i18n="trayBig">Enlarged</figcaption></figure>
+          <figure><span class="tbar"><svg class="ring small" data-ring viewBox="0 0 32 32" aria-hidden="true"></svg><span id="trayClock">14:37</span></span><figcaption data-i18n="traySmall">Real size</figcaption></figure>
+        </div>
+        <p class="note" data-i18n="trayNote">The ring is one round: the long arc is the hold, the short one is the break. It fills as time passes and updates once a minute, so it costs nothing.</p>
+      </div>
+
+      <div id="miniWrap">
+        <h2 data-i18n="mini">Mini timer</h2>
+        <div class="mini-desk" id="miniDesk">
+          <div class="mini hold" id="miniLive" tabindex="0"><i></i><b id="miniTime">18:42</b><span id="miniLabel">Hold</span></div>
+        </div>
+        <p class="note" data-i18n="miniNote">Floats above other windows. Drag it anywhere, double-click to open Cloudbreak.</p>
+      </div>
+
+      <div>
+        <h2 data-i18n="colors">Colors</h2>
+        <div class="palette">
+          <span class="sw"><i style="background:var(--hold)"></i><span data-i18n="cInk">Ink, for holds</span></span>
+          <span class="sw"><i style="background:var(--vapor)"></i><span data-i18n="cVapor">Vapor, for breaks</span></span>
+          <span class="sw"><i style="background:var(--mist)"></i><span data-i18n="cMist">Mist</span></span>
+        </div>
+        <p class="note" data-i18n="colorNote">Holds stay in black and white. The only color in the app is your break.</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const DAY = 86400;
+
+  /* ---------- Strings ---------- */
+  const I18N = {
+    en: {
+      h1: 'Twenty-five minutes without. Five minutes with.',
+      intro: 'A pomodoro timer for vaping less. Start it once and it loops hold and break until you stop it. You choose how long each part lasts and the hours it runs. This is an interactive mockup of the Windows app.',
+      hold: 'Hold', break: 'Break', paused: 'Paused', ready: 'Ready', offHours: 'Off hours',
+      round: (n) => `Round ${n}`,
+      hintHold: (t) => `No vaping until <b>${t}</b>.`,
+      hintBreak: (t) => `Vape if you want to. Next hold at <b>${t}</b>.`,
+      hintPaused: 'Paused. Resume to keep counting.',
+      hintIdle: (m) => `Start a ${m}-minute hold. It loops until you stop it.`,
+      hintOutside: (t) => `Outside your active hours. Back at <b>${t}</b>.`,
+      start: 'Start', pause: 'Pause', resume: 'Resume', skipBreak: 'Skip break', stop: 'Stop',
+      today: 'Today', allDay: 'All day',
+      holdsDone: 'Holds done', vapeFree: 'Vape-free', skipped: 'Breaks skipped',
+      preview: 'Preview', jump: 'Jump to end of phase', clock: 'Clock',
+      settingsTitle: 'Cloudbreak settings', settings: 'Settings', rhythm: 'Rhythm',
+      holdDesc: 'Time without vaping', breakDesc: 'Time you can vape',
+      activeHours: 'Active hours', activeDesc: 'Only run between these times',
+      hoursOn: (t) => `Outside these hours Cloudbreak waits, then starts again at ${t}.`,
+      hoursOff: 'Cloudbreak runs all day until you stop it.',
+      navTimer: 'Timer', navAlerts: 'Alerts', navGeneral: 'General',
+      roundLen: (m) => `One round lasts ${m} minutes, then it starts again.`,
+      notifDesc: 'A message on screen when the phase changes',
+      soundDesc: 'A soft chime when the phase changes. Works with or without notifications.',
+      notif: 'Notifications', sound: 'Sound',
+      posLabel: 'Position',
+      corners: { tl: 'Top left', tr: 'Top right', bl: 'Bottom left', br: 'Bottom right' },
+      login: 'Start with Windows', loginDesc: 'Opens in the tray when you turn on the PC',
+      accent: 'Accent color', accViolet: 'Violet', accWin: 'Match Windows',
+      accentNoteV: 'Cloudbreak violet, used for breaks.',
+      accentNoteW: 'Uses your Windows accent color and follows it when you change it.',
+      mini: 'Mini timer', miniDesc: 'Small always-on-top timer',
+      language: 'Language', langDesc: 'Automatic follows your Windows language', langAuto: 'Automatic',
+      applyNow: 'Changes apply right away.',
+      notifications: 'Notifications',
+      tBreakTitle: 'Break time', tHoldTitle: "Break's over", dismiss: 'Dismiss',
+      tBreak: (m, t) => `You can vape for ${m} minute${m === 1 ? '' : 's'}. Next hold starts at ${t}.`,
+      tHold: (m, t) => `Hold for ${m} minutes, until ${t}.`,
+      notifNote: 'Cloudbreak draws its own notifications, only during your active hours. They show up on your main screen, in the corner you pick in Settings, and close by themselves after a few seconds. The icon next to the clock opens the app.',
+      miniNote: 'One small chip with the time left. It stays above other windows and turns violet during a break. Drag it anywhere on the screen (try it here). It remembers where you left it, and a double-click opens Cloudbreak.',
+      colors: 'Colors', cInk: 'Ink, for holds', cVapor: 'Vapor, for breaks', cMist: 'Mist',
+      colorNote: 'Holds stay in black and white. The only color in the app is your break.',
+      appIconTitle: 'App icon',
+      appIconNote: 'The same ring as the tray icon, on a dark tile so it reads on light and dark Windows. Used for the Start menu, the taskbar, the installer and the desktop shortcut. The small logo inside the app is the same mark without the tile.',
+      trayTitle: 'Tray icon', trayBig: 'Enlarged', traySmall: 'Real size',
+      trayNote: 'The ring is one round: the long arc is the hold, the short one is the break. It fills as time passes and updates once a minute, so it costs nothing.',
+      thAuto: 'Auto', thLight: 'Light', thDark: 'Dark',
+      pin: 'Keep on top', minimize: 'Minimize', closeTray: 'Close to tray', close: 'Close',
+    },
+    it: {
+      h1: 'Venticinque minuti senza. Cinque minuti con.',
+      intro: "Un timer pomodoro per svapare meno. Lo avvii una volta e alterna attesa e pausa finché non lo fermi. Scegli tu quanto dura ogni fase e in quali orari funziona. Questo è un mockup interattivo dell'app per Windows.",
+      hold: 'Resisti', break: 'Pausa', paused: 'Sospeso', ready: 'Pronto', offHours: 'Fuori orario',
+      round: (n) => `Giro ${n}`,
+      hintHold: (t) => `Niente svapo fino alle <b>${t}</b>.`,
+      hintBreak: (t) => `Puoi svapare. Si riprende alle <b>${t}</b>.`,
+      hintPaused: 'Sospeso. Riprendi per continuare il conteggio.',
+      hintIdle: (m) => `Avvia ${m} minuti senza svapo. Si ripete finché non lo fermi.`,
+      hintOutside: (t) => `Fuori dagli orari attivi. Riparte alle <b>${t}</b>.`,
+      start: 'Avvia', pause: 'Sospendi', resume: 'Riprendi', skipBreak: 'Salta la pausa', stop: 'Ferma',
+      today: 'Oggi', allDay: 'Tutto il giorno',
+      holdsDone: 'Giri completati', vapeFree: 'Senza svapo', skipped: 'Pause saltate',
+      preview: 'Anteprima', jump: 'Vai a fine fase', clock: 'Ora',
+      settingsTitle: 'Impostazioni di Cloudbreak', settings: 'Impostazioni', rhythm: 'Ritmo',
+      holdDesc: 'Tempo senza svapare', breakDesc: 'Tempo in cui puoi svapare',
+      activeHours: 'Orari attivi', activeDesc: 'Funziona solo in questa fascia oraria',
+      hoursOn: (t) => `Fuori orario Cloudbreak aspetta e riparte da solo alle ${t}.`,
+      hoursOff: 'Cloudbreak funziona tutto il giorno finché non lo fermi.',
+      navTimer: 'Timer', navAlerts: 'Avvisi', navGeneral: 'Generale',
+      roundLen: (m) => `Un giro dura ${m} minuti, poi ricomincia.`,
+      notifDesc: 'Un avviso a schermo quando cambia la fase',
+      soundDesc: 'Un rintocco quando cambia la fase. Funziona con o senza avvisi.',
+      notif: 'Notifiche', sound: 'Suono',
+      posLabel: 'Posizione',
+      corners: { tl: 'In alto a sinistra', tr: 'In alto a destra', bl: 'In basso a sinistra', br: 'In basso a destra' },
+      login: 'Avvia con Windows', loginDesc: 'Si apre nella barra quando accendi il PC',
+      accent: 'Colore principale', accViolet: 'Viola', accWin: 'Come Windows',
+      accentNoteV: 'Il viola di Cloudbreak, usato per le pause.',
+      accentNoteW: 'Usa il colore principale di Windows e lo segue quando lo cambi.',
+      mini: 'Mini timer', miniDesc: 'Timer piccolo sempre in primo piano',
+      language: 'Lingua', langDesc: 'Automatica segue la lingua di Windows', langAuto: 'Automatica',
+      applyNow: 'Le modifiche si applicano subito.',
+      notifications: 'Notifiche',
+      tBreakTitle: 'È ora della pausa', tHoldTitle: 'Pausa finita', dismiss: 'Chiudi',
+      tBreak: (m, t) => `Puoi svapare per ${m} minut${m === 1 ? 'o' : 'i'}. Si riprende alle ${t}.`,
+      tHold: (m, t) => `Resisti ${m} minuti, fino alle ${t}.`,
+      notifNote: "Cloudbreak usa notifiche sue, solo negli orari attivi. Compaiono sullo schermo principale, nell'angolo che scegli nelle impostazioni, e si chiudono da sole dopo qualche secondo. L'icona accanto all'orologio apre l'app.",
+      miniNote: "Una sola chip con il tempo rimanente. Resta sopra le altre finestre e diventa viola durante la pausa. Trascinala dove vuoi sullo schermo (provalo qui). Ricorda dove l'hai lasciata, e con un doppio clic apri Cloudbreak.",
+      colors: 'Colori', cInk: 'Inchiostro, per resistere', cVapor: 'Vapore, per le pause', cMist: 'Nebbia',
+      colorNote: "Mentre resisti tutto resta in bianco e nero. L'unico colore dell'app è la pausa.",
+      appIconTitle: "Icona dell'app",
+      appIconNote: "Lo stesso anello dell'icona accanto all'orologio, su un riquadro scuro, così si legge sia con Windows chiaro sia scuro. È l'icona del menu Start, della barra delle applicazioni, del setup e del collegamento sul desktop. Il piccolo logo dentro l'app è lo stesso segno, senza riquadro.",
+      trayTitle: "Icona nell'area di notifica", trayBig: 'Ingrandita', traySmall: 'Dimensione reale',
+      trayNote: "L'anello è un giro: l'arco lungo è il tempo in cui resisti, quello corto è la pausa. Si riempie con il passare del tempo e si aggiorna una volta al minuto, quindi non consuma niente.",
+      thAuto: 'Auto', thLight: 'Chiaro', thDark: 'Scuro',
+      pin: 'Sempre in primo piano', minimize: 'Riduci a icona', closeTray: "Chiudi nell'area di notifica", close: 'Chiudi',
+    },
+  };
+  const sysLang = () => ((navigator.languages && navigator.languages[0]) || navigator.language || 'en').toLowerCase().startsWith('it') ? 'it' : 'en';
+  let langChoice = 'auto';
+  try { langChoice = localStorage.getItem('cb-lang') || 'auto'; } catch (e) {}
+  let L = I18N.en;
+  function applyLang() {
+    const code = langChoice === 'auto' ? sysLang() : langChoice;
+    L = I18N[code];
+    document.documentElement.lang = code;
+    document.querySelectorAll('[data-i18n]').forEach(el => { const v = L[el.dataset.i18n]; if (typeof v === 'string') el.textContent = v; });
+    document.querySelectorAll('[data-i18n-title]').forEach(el => { const v = L[el.dataset.i18nTitle]; el.title = v; el.setAttribute('aria-label', v); });
+    document.querySelectorAll('#langSeg button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.lang === langChoice)));
+  }
+
+  /* ---------- Timer state ---------- */
+  const S = {
+    hold: 25, brk: 5,
+    activeOn: true, aStart: 9 * 60, aEnd: 23 * 60,
+    running: true, outside: false, speed: 1, corner: 'tr', accent: 'violet',
+    now: 14 * 3600 + 37 * 60 + 18,
+    history: [], cur: null,
+  };
+
+  (function seed() {
+    let t = 9 * 3600 + 4 * 60, type = 'hold', breaks = 0;
+    for (;;) {
+      let len = (type === 'hold' ? S.hold : S.brk) * 60;
+      let skipped = false;
+      if (type === 'break') { breaks++; if (breaks === 3 || breaks === 7) { len = 0; skipped = true; } }
+      if (t + len > S.now) { S.cur = { type, start: t, end: t + len }; break; }
+      S.history.push({ type, start: t, end: t + len, skipped });
+      t += len; type = type === 'hold' ? 'break' : 'hold';
+    }
+  })();
+
+  const pad = (n) => String(n).padStart(2, '0');
+  const tod = (s) => { s = ((Math.round(s) % DAY) + DAY) % DAY; return pad(Math.floor(s / 3600)) + ':' + pad(Math.floor(s / 60) % 60); };
+  const minToStr = (m) => pad(Math.floor(m / 60)) + ':' + pad(m % 60);
+  const strToMin = (v) => { const [h, m] = v.split(':').map(Number); return h * 60 + m; };
+  const dur = (s) => {
+    s = Math.max(0, Math.ceil(s));
+    const h = Math.floor(s / 3600), m = Math.floor(s / 60) % 60, sec = s % 60;
+    return h ? h + ':' + pad(m) + ':' + pad(sec) : pad(m) + ':' + pad(sec);
+  };
+  const lenOf = (type) => (type === 'hold' ? S.hold : S.brk) * 60;
+
+  function advance() {
+    const c = S.cur;
+    S.history.push(c);
+    const type = c.type === 'hold' ? 'break' : 'hold';
+    S.cur = { type, start: c.end, end: c.end + lenOf(type) };
+  }
+  function startLoop() {
+    S.outside = false; S.running = true;
+    S.cur = { type: 'hold', start: S.now, end: S.now + lenOf('hold') };
+  }
+  function stopLoop() {
+    if (S.cur) { S.cur.end = S.now; if (S.cur.end > S.cur.start) S.history.push(S.cur); }
+    S.cur = null; S.running = false;
+  }
+  function step(dt) {
+    const prev = S.now;
+    S.now = Math.min(S.now + dt, DAY - 1);
+    if (S.activeOn) {
+      const endS = S.aEnd * 60, startS = S.aStart * 60;
+      if (S.cur && prev < endS && S.now >= endS) { stopLoop(); S.outside = true; }
+      if (!S.cur && S.outside && prev < startS && S.now >= startS) startLoop();
+    }
+    if (!S.cur) return;
+    if (!S.running) { S.cur.end += dt; return; }
+    let guard = 0;
+    while (S.now >= S.cur.end && guard++ < 500) advance();
+  }
+  function stats() {
+    let holds = 0, partial = 0, free = 0, skip = 0;
+    for (const s of S.history) {
+      if (s.type === 'hold') { free += s.end - s.start; if (s.end - s.start >= S.hold * 60 - 1) holds++; else partial++; }
+      if (s.skipped) skip++;
+    }
+    if (S.cur && S.cur.type === 'hold') free += Math.max(0, S.now - S.cur.start);
+    return { holds, partial, free, skip };
+  }
+
+  function renderStrip() {
+    const R0 = S.activeOn ? S.aStart * 60 : 0;
+    const R1 = S.activeOn ? Math.max(S.aEnd * 60, R0 + 3600) : DAY;
+    const pct = (t) => ((t - R0) / (R1 - R0)) * 100;
+    const seg = (s) => {
+      const a = Math.max(s.start, R0), b = Math.min(s.end, R1);
+      if (b <= a) return '';
+      return `<span class="seg ${s.type}${s.skipped ? ' skipped' : ''}" style="left:${pct(a)}%;width:${pct(b) - pct(a)}%"></span>`;
+    };
+    let html = S.history.map(seg).join('');
+    if (S.cur) {
+      html += seg(S.cur);
+      let t = S.cur.end, type = S.cur.type === 'hold' ? 'break' : 'hold', n = 0;
+      while (t < R1 && n++ < 400) { const e = t + lenOf(type); html += seg({ type, start: t, end: e }); t = e; type = type === 'hold' ? 'break' : 'hold'; }
+    }
+    const nowP = Math.min(100, Math.max(0, pct(S.now)));
+    html += `<span class="future" style="left:${nowP}%"></span><span class="now" style="left:${nowP}%"></span>`;
+    $('strip').innerHTML = html;
+
+    let ticks = `<span class="first" style="left:0">${tod(R0)}</span>`;
+    const step3 = 3 * 3600;
+    for (let t = Math.ceil(R0 / step3) * step3; t < R1; t += step3) {
+      const p = pct(t);
+      if (p > 14 && p < 80) ticks += `<span style="left:${p}%">${tod(t)}</span>`;
+    }
+    ticks += `<span class="last" style="left:100%">${R1 >= DAY ? '24:00' : tod(R1)}</span>`;
+    $('ticks').innerHTML = ticks;
+    $('dayRange').textContent = S.activeOn ? `${minToStr(S.aStart)}–${minToStr(S.aEnd)}` : L.allDay;
+  }
+
+  function render() {
+    const win = $('mainWin');
+    const c = S.cur;
+    const phase = c ? c.type : 'hold';
+    const state = !c ? 'idle' : S.running ? 'running' : 'paused';
+    win.dataset.phase = phase;
+    win.dataset.state = state;
+
+    const remaining = c ? c.end - S.now : lenOf('hold');
+    $('timer').textContent = dur(remaining);
+
+    const name = !c ? (S.outside ? L.offHours : L.ready) : state === 'paused' ? L.paused : L[phase];
+    $('phaseName').textContent = name;
+
+    let hint;
+    if (!c && S.outside) hint = L.hintOutside(minToStr(S.aStart));
+    else if (!c) hint = L.hintIdle(S.hold);
+    else if (state === 'paused') hint = L.hintPaused;
+    else if (phase === 'hold') hint = L.hintHold(tod(c.end));
+    else hint = L.hintBreak(tod(c.end));
+    $('hint').innerHTML = hint;
+
+    const len = c ? c.end - c.start : 1;
+    $('barFill').style.width = c ? Math.min(100, ((S.now - c.start) / len) * 100) + '%' : '0%';
+
+    const st = stats();
+    $('round').textContent = c ? L.round(st.holds + st.partial + (c.type === 'hold' ? 1 : 0)) : '';
+    $('sHolds').textContent = st.holds;
+    const fm = Math.floor(st.free / 60);
+    $('sFree').textContent = fm >= 60 ? `${Math.floor(fm / 60)}h ${fm % 60}m` : `${fm}m`;
+    $('sSkip').textContent = st.skip;
+
+    $('primaryBtn').textContent = !c ? L.start : S.running ? L.pause : L.resume;
+    $('skipBtn').hidden = !(c && phase === 'break');
+    $('stopBtn').hidden = !c;
+    $('jumpBtn').disabled = !c;
+
+    $('clock').textContent = `${L.clock} ${tod(S.now)}`;
+    $('taskClock').innerHTML = `${tod(S.now)}<br>16/11/2026`;
+
+    $('holdVal').innerHTML = `<b>${S.hold}</b> min`;
+    $('brkVal').innerHTML = `<b>${S.brk}</b> min`;
+    document.querySelectorAll('.chip').forEach(ch => ch.setAttribute('aria-pressed', String(+ch.dataset.h === S.hold && +ch.dataset.b === S.brk)));
+    $('hoursRow').classList.toggle('off', !S.activeOn);
+    $('startVal').textContent = minToStr(S.aStart);
+    $('endVal').textContent = minToStr(S.aEnd);
+    $('barHold').style.flexGrow = S.hold;
+    $('barBreak').style.flexGrow = S.brk;
+    $('roundLen').textContent = L.roundLen(S.hold + S.brk);
+    $('posBlock').style.opacity = $('optNotify').checked ? 1 : 0.45;
+    $('hoursNote').textContent = S.activeOn ? L.hoursOn(minToStr(S.aStart)) : L.hoursOff;
+
+    const breakAt = c ? (c.type === 'hold' ? c.end : c.end + lenOf('hold')) : S.now + lenOf('hold');
+    const holdAt = breakAt + lenOf('break');
+    $('toastBreak').textContent = L.tBreak(S.brk, tod(holdAt));
+    $('toastHold').textContent = L.tHold(S.hold, tod(holdAt + lenOf('hold')));
+
+    $('desk').dataset.corner = S.corner;
+    $('posName').textContent = L.corners[S.corner];
+    document.querySelectorAll('.corner-pick button').forEach(b => {
+      b.setAttribute('aria-checked', String(b.dataset.corner === S.corner));
+      b.title = L.corners[b.dataset.corner];
+      b.setAttribute('aria-label', L.corners[b.dataset.corner]);
+    });
+
+    document.documentElement.classList.toggle('accent-win', S.accent === 'windows');
+    document.querySelectorAll('.accent-pick button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.accent === S.accent)));
+    $('accentNote').textContent = S.accent === 'windows' ? L.accentNoteW : L.accentNoteV;
+
+    $('miniLive').className = 'mini ' + phase;
+    $('miniTime').textContent = dur(remaining);    $('trayClock').textContent = tod(S.now);
+    renderRings(c);
+    $('miniLabel').textContent = name;
+    $('miniWrap').hidden = !$('optMini').checked;
+
+    renderStrip();
+  }
+
+  /* Tray ring: circle r=11.5, starts at 12 o'clock. Hold arc, gap, break arc, gap.
+     Progress fills the hold arc, then the break arc. Updated once per (preview) minute. */
+  const RC = 2 * Math.PI * 11.5, GAP = 5.2;
+  let lastRingKey = '';
+  function arc(el, start, len) {
+    len = Math.max(0, len);
+    el.setAttribute('stroke-dasharray', `${len} ${RC}`);
+    el.setAttribute('stroke-dashoffset', String(-start));
+    el.style.opacity = len > 0.01 ? 1 : 0;
+  }
+  function renderRings(c) {
+    const total = S.hold + S.brk;
+    const usable = RC - 2 * GAP;
+    const hLen = usable * S.hold / total, bLen = usable * S.brk / total;
+    const bStart = hLen + GAP;
+    let pH = 0, pB = 0;
+    if (c) {
+      const p = Math.min(1, Math.max(0, (S.now - c.start) / (c.end - c.start)));
+      if (c.type === 'hold') pH = p; else { pH = 1; pB = p; }
+    }
+    const minuteKey = [Math.floor(S.now / 60), S.hold, S.brk, c ? c.type : 'idle', S.running].join('|');
+    if (minuteKey === lastRingKey) return;
+    lastRingKey = minuteKey;
+    document.querySelectorAll('[data-ring]').forEach(svg => {
+      if (!svg.firstChild) {
+        svg.innerHTML = ['t-h', 't-b', 'p-h', 'p-b'].map(k => `<circle class="${k}" cx="16" cy="16" r="11.5" transform="rotate(-90 16 16)"/>`).join('') + '<circle class="dot" cx="16" cy="16" r="3.6"/>';
+      }
+      const q = (k) => svg.querySelector('.' + k);
+      // Round caps add half a stroke at each end, so the arcs are shortened to keep the gaps visible.
+      const cap = 3.4;
+      arc(q('t-h'), cap / 2, hLen - cap);
+      arc(q('t-b'), bStart + cap / 2, bLen - cap);
+      arc(q('p-h'), cap / 2, (hLen - cap) * pH);
+      arc(q('p-b'), bStart + cap / 2, (bLen - cap) * pB);
+      svg.classList.toggle('idle', !c || !S.running);
+    });
+  }
+
+  // Theme preview: auto follows the system, or force light / dark
+  document.querySelectorAll('[data-theme-pick]').forEach(b => b.addEventListener('click', () => {
+    const v = b.dataset.themePick;
+    if (v === 'auto') document.documentElement.removeAttribute('data-theme');
+    else document.documentElement.setAttribute('data-theme', v);
+    document.querySelectorAll('[data-theme-pick]').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+  }));
+
+  let last = performance.now();
+  setInterval(() => {
+    const t = performance.now();
+    step(Math.min(1, (t - last) / 1000) * S.speed);
+    last = t;
+    render();
+  }, 250);
+
+  /* ---------- Events ---------- */
+  $('primaryBtn').addEventListener('click', () => { if (!S.cur) startLoop(); else S.running = !S.running; render(); });
+  $('stopBtn').addEventListener('click', () => { stopLoop(); S.outside = false; render(); });
+  $('skipBtn').addEventListener('click', () => {
+    const c = S.cur; if (!c || c.type !== 'break') return;
+    c.end = S.now; c.skipped = c.end - c.start < lenOf('break') / 2;
+    S.history.push(c);
+    S.cur = { type: 'hold', start: S.now, end: S.now + lenOf('hold') };
+    S.running = true;
+    render();
+  });
+  $('pinBtn').addEventListener('click', (e) => {
+    const b = e.currentTarget, on = b.getAttribute('aria-pressed') !== 'true';
+    b.setAttribute('aria-pressed', String(on)); b.classList.toggle('pinned', on);
+  });
+
+  document.querySelectorAll('[data-speed]').forEach(b => b.addEventListener('click', () => {
+    S.speed = +b.dataset.speed;
+    document.querySelectorAll('[data-speed]').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+  }));
+  $('jumpBtn').addEventListener('click', () => {
+    if (!S.cur) return;
+    const target = S.cur.end - 3;
+    if (target > S.now) S.now = target;
+    S.running = true;
+    render();
+  });
+
+  function setDurations(h, b) {
+    S.hold = Math.min(120, Math.max(5, h));
+    S.brk = Math.min(30, Math.max(1, b));
+    if (S.cur) { S.cur.end = S.cur.start + lenOf(S.cur.type); step(0); }
+    render();
+  }
+  $('holdMinus').addEventListener('click', () => setDurations(S.hold - 5, S.brk));
+  $('holdPlus').addEventListener('click', () => setDurations(S.hold + 5, S.brk));
+  $('brkMinus').addEventListener('click', () => setDurations(S.hold, S.brk - 1));
+  $('brkPlus').addEventListener('click', () => setDurations(S.hold, S.brk + 1));
+  document.querySelectorAll('.chip').forEach(ch => ch.addEventListener('click', () => setDurations(+ch.dataset.h, +ch.dataset.b)));
+
+  $('activeOn').addEventListener('change', (e) => { S.activeOn = e.target.checked; render(); });
+  $('optMini').addEventListener('change', render);
+  document.querySelectorAll('.corner-pick button').forEach(b => b.addEventListener('click', () => { S.corner = b.dataset.corner; render(); }));
+
+  document.querySelectorAll('.accent-pick button').forEach(b => b.addEventListener('click', () => { S.accent = b.dataset.accent; render(); }));
+
+  // Drag the mini timer around its little desktop
+  (function () {
+    const chip = $('miniLive'), desk = $('miniDesk');
+    let dx = 0, dy = 0, dragging = false;
+    const place = (x, y) => {
+      const maxX = desk.clientWidth - chip.offsetWidth, maxY = desk.clientHeight - chip.offsetHeight;
+      chip.style.left = Math.max(0, Math.min(maxX, x)) + 'px';
+      chip.style.top = Math.max(0, Math.min(maxY, y)) + 'px';
+    };
+    chip.addEventListener('pointerdown', (e) => {
+      dragging = true; chip.classList.add('dragging'); chip.setPointerCapture(e.pointerId);
+      dx = e.clientX - chip.offsetLeft; dy = e.clientY - chip.offsetTop;
+    });
+    chip.addEventListener('pointermove', (e) => { if (dragging) place(e.clientX - dx, e.clientY - dy); });
+    const end = () => { dragging = false; chip.classList.remove('dragging'); };
+    chip.addEventListener('pointerup', end);
+    chip.addEventListener('pointercancel', end);
+    chip.addEventListener('keydown', (e) => {
+      const k = { ArrowLeft: [-10, 0], ArrowRight: [10, 0], ArrowUp: [0, -10], ArrowDown: [0, 10] }[e.key];
+      if (k) { e.preventDefault(); place(chip.offsetLeft + k[0], chip.offsetTop + k[1]); }
+    });
+  })();
+  document.querySelectorAll('#langSeg button').forEach(b => b.addEventListener('click', () => {
+    langChoice = b.dataset.lang;
+    try { localStorage.setItem('cb-lang', langChoice); } catch (err) {}
+    applyLang(); render();
+  }));
+
+  // Settings sections
+  document.querySelectorAll('.nav button').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('.nav button').forEach(x => x.setAttribute('aria-selected', String(x === b)));
+    document.querySelectorAll('.st-page').forEach(p => { p.hidden = p.dataset.page !== b.dataset.page; });
+  }));
+
+  // Active hours steppers, 30 minutes at a time
+  const shift = (m, d) => ((m + d) % 1440 + 1440) % 1440;
+  $('startMinus').addEventListener('click', () => { S.aStart = shift(S.aStart, -30); render(); });
+  $('startPlus').addEventListener('click', () => { S.aStart = shift(S.aStart, 30); render(); });
+  $('endMinus').addEventListener('click', () => { S.aEnd = shift(S.aEnd, -30); render(); });
+  $('endPlus').addEventListener('click', () => { S.aEnd = shift(S.aEnd, 30); render(); });
+  $('optNotify').addEventListener('change', render);
+
+  applyLang();
+  render();
+})();
+</script>

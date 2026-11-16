@@ -1,0 +1,28 @@
+<Window x:Class="Cloudbreak.Views.MiniWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Cloudbreak mini timer" SizeToContent="WidthAndHeight"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        ResizeMode="NoResize" ShowInTaskbar="False" Topmost="True" ShowActivated="False"
+        FontFamily="{StaticResource UiFont}" FontSize="13" Foreground="{DynamicResource InkBrush}"
+        UseLayoutRounding="True" Cursor="SizeAll">
+    <Grid Margin="10">
+        <!-- The shadow sits on its own cached layer, so the per-second text change does not re-blur it -->
+        <Border CornerRadius="17" Background="{DynamicResource PaperBrush}">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="14" ShadowDepth="3" Direction="270" Opacity="0.16" Color="{DynamicResource ShadowColor}"/>
+            </Border.Effect>
+            <Border.CacheMode>
+                <BitmapCache SnapsToDevicePixels="True"/>
+            </Border.CacheMode>
+        </Border>
+        <Border x:Name="Pill" CornerRadius="17" Padding="11,7,14,8" BorderThickness="1"
+                Background="{DynamicResource PaperBrush}" BorderBrush="{DynamicResource LineBrush}">
+            <StackPanel Orientation="Horizontal">
+                <Ellipse x:Name="Dot" Width="8" Height="8" VerticalAlignment="Center" StrokeThickness="1.5"/>
+                <TextBlock x:Name="TimeText" Margin="9,0,0,0" FontWeight="Medium" Typography.NumeralAlignment="Tabular" Text="25:00"/>
+                <TextBlock x:Name="LabelText" Margin="8,0,0,0" Foreground="{DynamicResource MutedBrush}"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>

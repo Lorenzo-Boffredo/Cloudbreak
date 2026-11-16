@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <AssemblyName>Cloudbreak</AssemblyName>
+    <RootNamespace>Cloudbreak</RootNamespace>
+    <ApplicationIcon>..\..\assets\cloudbreak.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <Version>1.0.0</Version>
+    <Product>Cloudbreak</Product>
+    <Company>Cloudbreak</Company>
+    <Description>Cloudbreak</Description>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+
+    <!-- Low footprint: workstation GC without the background GC thread -->
+    <ServerGarbageCollection>false</ServerGarbageCollection>
+    <ConcurrentGarbageCollection>false</ConcurrentGarbageCollection>
+    <TieredPGO>false</TieredPGO>
+    <DebugType>none</DebugType>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Window icon of the main and settings windows (shown in Alt+Tab) -->
+    <Resource Include="..\..\assets\cloudbreak.ico" Link="cloudbreak.ico" />
+  </ItemGroup>
+
+</Project>
