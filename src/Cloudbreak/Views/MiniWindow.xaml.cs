@@ -2,6 +2,7 @@
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Threading;
 using Cloudbreak.Core;
 
 namespace Cloudbreak.Views;
@@ -19,10 +20,45 @@ public partial class MiniWindow : Window
         InitializeComponent();
         Dot.Fill = _dot;
         Dot.Stroke = _dot;
-        SourceInitialized += (_, _) => Native.AddExStyle(this, Native.WS_EX_TOOLWINDOW);
+        SourceInitialized += (_, _) =>
+        {
+            Native.AddExStyle(this, Native.WS_EX_TOOLWINDOW);
+            // When another window takes the foreground (the taskbar above all), it can cover the chip:
+            // put the chip back on top. One callback per foreground change, nothing in between.
+            _onForeground = (_, _, _, _, _, _, _) => KeepOnTop();
+            _hook = Native.SetWinEventHook(Native.EVENT_SYSTEM_FOREGROUND, Native.EVENT_SYSTEM_FOREGROUND, IntPtr.Zero,
+                _onForeground, 0, 0, Native.WINEVENT_OUTOFCONTEXT | Native.WINEVENT_SKIPOWNPROCESS);
+        };
         DotAlign.Apply(Dot, TimeText, "0");
         Loaded += (_, _) => PlaceInitially();
         IsVisibleChanged += (_, _) => _c.Reschedule();
+    }
+
+    private Native.WinEventProc? _onForeground; // kept in a field so the GC does not collect the callback
+    private IntPtr _hook;
+    private DispatcherTimer? _again;
+
+    /// <summary>Back above other topmost windows (the break fog).</summary>
+    public void BringToFront() => Native.BringToTop(this);
+
+    private void KeepOnTop()
+    {
+        Native.BringToTop(this);
+        // The taskbar raises itself again right after it activates: repeat once, a moment later.
+        _again ??= new DispatcherTimer(TimeSpan.FromMilliseconds(300), DispatcherPriority.Normal, (_, _) =>
+        {
+            _again!.Stop();
+            Native.BringToTop(this);
+        }, Dispatcher);
+        _again.Stop();
+        _again.Start();
+    }
+
+    protected override void OnClosed(EventArgs e)
+    {
+        _again?.Stop();
+        if (_hook != IntPtr.Zero) { Native.UnhookWinEvent(_hook); _hook = IntPtr.Zero; }
+        base.OnClosed(e);
     }
 
     public bool IsOnScreen => IsVisible;

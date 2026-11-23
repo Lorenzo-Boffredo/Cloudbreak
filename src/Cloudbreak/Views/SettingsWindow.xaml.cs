@@ -57,6 +57,9 @@ public partial class SettingsWindow : Window
         Load();
     }
 
+    /// <summary>Shows settings changed elsewhere (the tray menu).</summary>
+    public void Reload() => Load();
+
     private void Load()
     {
         var L = Loc.I;
@@ -91,7 +94,9 @@ public partial class SettingsWindow : Window
         System.Windows.Automation.AutomationProperties.SetName(AccViolet, L["accViolet"]);
         System.Windows.Automation.AutomationProperties.SetName(AccWindows, L["accWin"]);
 
-        SoundOn.IsChecked = S.Sound;        LoginOn.IsChecked = S.StartWithWindows;
+        SoundOn.IsChecked = S.Sound;
+        FogOn.IsChecked = S.Fog;
+        LoginOn.IsChecked = S.StartWithWindows;
         MiniOn.IsChecked = S.MiniTimer;
 
         AccViolet.IsChecked = S.Accent == "violet";
@@ -148,6 +153,7 @@ public partial class SettingsWindow : Window
     {
         S.Notifications = NotifyOn.IsChecked == true;
         S.Sound = SoundOn.IsChecked == true;
+        S.Fog = FogOn.IsChecked == true;
         S.StartWithWindows = LoginOn.IsChecked == true;
         S.MiniTimer = MiniOn.IsChecked == true;
         Commit(SettingsChange.Behavior);

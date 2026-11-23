@@ -28,7 +28,7 @@ Start it once and it loops on its own: hold, break, hold again, until you stop i
 
 ## How it works
 
-The day is a row of rounds. Each round is a **hold**, time without vaping, followed by a **break**, time you can vape. When one ends, the next one starts and you get a quiet notification.
+The day is a row of rounds. Each round is a **hold**, time without vaping, followed by a **break**, time you can vape. When one ends, the next one starts on its own.
 
 <table>
   <tr>
@@ -51,13 +51,25 @@ The day is a row of rounds. Each round is a **hold**, time without vaping, follo
 
 The bar under **Today** shows every hold and break of the day, so you can see how it is going at a glance.
 
+## When a break starts
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/screens/break-fog-dark.png">
+    <img src="docs/screens/break-fog-light.png" width="760" alt="Break fog: a little violet mist in the corners of two screens, with the mini timer showing the break">
+  </picture>
+</p>
+
+A little violet mist gathers in the corners of every screen you have connected. It stays about ten seconds, then fades. It never covers what you are working on, and clicks pass straight through it.
+
+You can also get a **notification** in the corner you pick and a **soft chime**. Fog, notification and chime each turn on or off on their own, so you choose how loud the break is.
+
 ## Features
 
 - **Your rhythm.** Pick the hold and break lengths, or use a preset: 25/5, 45/5, 60/10, 90/10.
 - **Active hours.** Outside them Cloudbreak waits, then starts again on its own.
 - **Starts with Windows** and lives next to the clock. The tray ring fills as the round goes by.
-- **Notifications** in the screen corner you choose. Sound on or off, separately.
-- **Mini timer.** A small always-on-top chip with the time left. Drag it anywhere.
+- **Mini timer.** A small always-on-top chip with the time left. Drag it anywhere, even onto the taskbar. It hides outside your active hours, unless you start a session yourself. Turn it on or off from the tray menu.
 - **Today's numbers.** Rounds completed, vape-free time, breaks skipped. Paused time never counts.
 - **Fits your Windows.** Light or dark theme, violet or your Windows accent color, English or Italian.
 
@@ -74,7 +86,7 @@ The bar under **Today** shows every hold and break of the day, so you can see ho
     <td width="50%">
       <picture>
         <source media="(prefers-color-scheme: dark)" srcset="docs/screens/settings-alerts-dark.png">
-        <img src="docs/screens/settings-alerts-light.png" alt="Alert settings: notifications and their position, sound, mini timer">
+        <img src="docs/screens/settings-alerts-light.png" alt="Alert settings: notifications and their position, break fog, sound, mini timer">
       </picture>
     </td>
   </tr>
@@ -95,6 +107,7 @@ Needs Windows 10 or 11 (64-bit) and the free [.NET 10 Desktop Runtime](https://d
 - Ticks once a second only while something is on screen. Otherwise it sleeps until the next phase or the next minute.
 - No redraws while the screen is off or the PC is locked.
 - Runs in Windows efficiency mode when no window is open.
+- The break fog is drawn from tiny images and lasts about twelve seconds per break; then its windows close and the memory goes back to Windows.
 - About 20 MB of memory and a fraction of a percent of one CPU core.
 
 ## Privacy
@@ -133,6 +146,10 @@ The installer is written to `Setup\`.
 **Venticinque minuti senza. Cinque minuti con.**
 
 Cloudbreak è un timer pomodoro per svapare meno, per Windows. Lo avvii una volta e va avanti da solo: **resisti** (niente svapo, 25 minuti di base), poi **pausa** (puoi svapare, 5 minuti), e si ripete finché non lo fermi.
+
+All'inizio della pausa una nebbiolina viola compare per una decina di secondi agli angoli di ogni schermo collegato. Puoi avere anche una notifica nell'angolo che scegli e un rintocco: nebbia, notifica e suono si accendono e si spengono ognuno per conto suo.
+
+Il mini timer resta sopra le altre finestre e puoi trascinarlo dove vuoi, anche sulla barra di Windows. Fuori dagli orari attivi si nasconde, a meno che tu non avvii una sessione a mano.
 
 **Installazione**
 

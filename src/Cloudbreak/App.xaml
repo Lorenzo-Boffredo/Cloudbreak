@@ -372,10 +372,19 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="MenuItem">
-                        <Border x:Name="Bd" CornerRadius="5" Padding="10,7" Background="Transparent">
-                            <ContentPresenter ContentSource="Header" RecognizesAccessKey="False"/>
+                        <!-- Every item keeps a narrow column on the left for the check mark, so labels line up -->
+                        <Border x:Name="Bd" CornerRadius="5" Padding="8,7,12,7" Background="Transparent">
+                            <DockPanel>
+                                <Path x:Name="Check" DockPanel.Dock="Left" Width="12" Height="12" Margin="2,0,8,0" VerticalAlignment="Center"
+                                      Data="M2,6.4 L4.6,8.8 L10,3.2" Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.6"
+                                      StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Visibility="Hidden"/>
+                                <ContentPresenter ContentSource="Header" RecognizesAccessKey="False" VerticalAlignment="Center"/>
+                            </DockPanel>
                         </Border>
                         <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Check" Property="Visibility" Value="Visible"/>
+                            </Trigger>
                             <Trigger Property="IsHighlighted" Value="True">
                                 <Setter TargetName="Bd" Property="Background" Value="{DynamicResource HoverBrush}"/>
                             </Trigger>
@@ -388,7 +397,8 @@
             </Setter>
         </Style>
 
-        <Style TargetType="Separator">
+        <!-- Menus look up their separators by this key, not by type: without it WPF draws its own, indented line -->
+        <Style x:Key="{x:Static MenuItem.SeparatorStyleKey}" TargetType="Separator">
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Separator">

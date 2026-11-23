@@ -18,6 +18,8 @@ public sealed class Settings
     public bool Notifications { get; set; } = true;
     /// <summary>tl, tr, bl, br</summary>
     public string NotificationCorner { get; set; } = "tr";
+    /// <summary>Violet mist in the corners of every screen for a few seconds when a break starts.</summary>
+    public bool Fog { get; set; } = true;
     public bool Sound { get; set; } = true;
     public bool StartWithWindows { get; set; } = true;
     public bool MiniTimer { get; set; } = true;

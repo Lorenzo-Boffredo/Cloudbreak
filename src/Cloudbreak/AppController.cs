@@ -27,6 +27,7 @@ public sealed class AppController : IDisposable
     private SettingsWindow? _settings;
     private MiniWindow? _mini;
     private ToastWindow? _toast;
+    private BreakFog? _fog;
     private ContextMenu? _menu;
     private string _trayKey = "";
     private bool _displayOff, _locked;
@@ -52,6 +53,8 @@ public sealed class AppController : IDisposable
         Engine = new TimerEngine(S, DayLog.Load(AppClock.Now));
         Engine.PhaseChanged += OnPhaseChanged;
         Engine.StateChanged += UpdateTray;
+        // After the engine has finished its own update: closing a window inside it would re-enter the clock.
+        Engine.StateChanged += () => Application.Current.Dispatcher.BeginInvoke(SyncMini, DispatcherPriority.Background);
 
         _timer = new DispatcherTimer(DispatcherPriority.Normal);
         _timer.Tick += (_, _) => Tick();
@@ -100,9 +103,26 @@ public sealed class AppController : IDisposable
         // Testing aid (debug builds only): CLOUDBREAK_DEMO=hold|break seeds a realistic day for screenshots.
         var demo = Environment.GetEnvironmentVariable("CLOUDBREAK_DEMO");
         if (demo is "hold" or "break") Engine.DemoSeed(AppClock.Now, demo == "break");
+        // Testing aid (debug builds only): CLOUDBREAK_OPEN=menu opens the tray menu, =alerts the Alerts settings, for screenshots.
+        var open = Environment.GetEnvironmentVariable("CLOUDBREAK_OPEN");
+        if (open == "alerts") { ShowSettings(); _settings!.NavAlerts.IsChecked = true; }
+        if (open == "startstop")
+        {
+            // =startstop presses Start after 3 s and Stop after 6 s, to test what follows a session started by hand.
+            var t = new DispatcherTimer { Interval = TimeSpan.FromSeconds(3) };
+            int n = 0;
+            t.Tick += (_, _) => { if (++n == 1) PrimaryAction(); else { t.Stop(); StopLoop(); } };
+            t.Start();
+        }
+        if (open == "menu")
+        {
+            var t = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1.5) };
+            t.Tick += (_, _) => { t.Stop(); ShowMenu(); };
+            t.Start();
+        }
 #endif
         UpdateTray();
-        if (S.MiniTimer) ShowMini();
+        SyncMini();
         if (showMain) ShowMain();
         Tick();
         TrimLater(TimeSpan.FromSeconds(8));
@@ -124,10 +144,10 @@ public sealed class AppController : IDisposable
         Schedule(now);
     }
 
-    /// <summary>Efficiency mode whenever no big window (main, settings) is open.</summary>
+    /// <summary>Efficiency mode whenever no big window (main, settings) is open and the fog is not drifting.</summary>
     private void UpdateEfficiency()
     {
-        bool background = _main == null && _settings == null;
+        bool background = _main == null && _settings == null && _fog == null;
         if (_efficiency == background) return;
         _efficiency = background;
         Native.SetEfficiencyMode(background);
@@ -164,9 +184,31 @@ public sealed class AppController : IDisposable
     private void OnPhaseChanged(Phase phase, Transition kind)
     {
         UpdateTray();
+        if (phase != Phase.Break) _fog?.FadeAway();
         if (kind == Transition.Silent) return;
         if (S.Sound) Chime.Play(phase == Phase.Break);
-        if (S.Notifications) ShowToast(phase, kind);
+        if (phase == Phase.Break && S.Fog && !Away)
+        {
+            ShowFog();
+            _mini?.BringToFront(); // the chip stays readable above the fog
+        }
+        if (S.Notifications) ShowToast(phase, kind); // last, so the toast and its buttons sit above both
+    }
+
+    private void ShowFog()
+    {
+        _fog?.Close();
+        var fog = new BreakFog();
+        fog.Finished += () =>
+        {
+            if (!ReferenceEquals(_fog, fog)) return;
+            _fog = null;
+            UpdateEfficiency();
+            TrimLater(TimeSpan.FromSeconds(2));
+        };
+        _fog = fog;
+        UpdateEfficiency(); // smooth drift needs normal timers for these few seconds
+        fog.Show();
     }
 
     private void ShowToast(Phase phase, Transition kind)
@@ -210,12 +252,14 @@ public sealed class AppController : IDisposable
     {
         Engine.SkipBreak(AppClock.Now);
         _toast?.Dismiss();
+        _fog?.FadeAway();
         Tick();
     }
 
     public void StopLoop()
     {
         Engine.Stop(AppClock.Now);
+        _fog?.FadeAway();
         Tick();
     }
 
@@ -230,8 +274,8 @@ public sealed class AppController : IDisposable
                 break;
             case SettingsChange.Behavior:
                 AutoStart.Apply(S.StartWithWindows);
-                if (S.MiniTimer) ShowMini();
-                else { _mini?.Close(); _mini = null; }
+                if (!S.Fog) _fog?.FadeAway();
+                SyncMini();
                 break;
             case SettingsChange.Look:
                 Loc.I.Set(S.Language);
@@ -276,6 +320,21 @@ public sealed class AppController : IDisposable
         }
         if (_settings.WindowState == WindowState.Minimized) _settings.WindowState = WindowState.Normal;
         _settings.Activate();
+    }
+
+    /// <summary>
+    /// The chip shows when it is on in Settings, except while Cloudbreak waits outside the active hours.
+    /// A session started by hand outside the hours is running, not waiting, so the chip comes back for it.
+    /// </summary>
+    private void SyncMini()
+    {
+        if (S.MiniTimer && Engine.State != RunState.OffHours) ShowMini();
+        else if (_mini != null)
+        {
+            var m = _mini;
+            _mini = null;
+            m.Close();
+        }
     }
 
     private void ShowMini()
@@ -405,6 +464,14 @@ public sealed class AppController : IDisposable
         if (active) Item(L["stop"], StopLoop);
         m.Items.Add(new Separator());
         Item(L["open"], ShowMain);
+        var mini = new MenuItem { Header = L["mini"], IsCheckable = true, IsChecked = S.MiniTimer };
+        mini.Click += (_, _) =>
+        {
+            S.MiniTimer = mini.IsChecked;
+            ApplySettings(SettingsChange.Behavior);
+            _settings?.Reload();
+        };
+        m.Items.Add(mini);
         Item(L["settings"], ShowSettings);
         m.Items.Add(new Separator());
         Item(L["quit"], () => Application.Current.Shutdown());
@@ -444,7 +511,7 @@ public sealed class AppController : IDisposable
         {
             _trim?.Stop();
             _trim = null;
-            if (_main == null && _settings == null && _toast == null) Native.TrimWorkingSet();
+            if (_main == null && _settings == null && _toast == null && _fog == null) Native.TrimWorkingSet();
         };
         _trim.Start();
     }
@@ -452,6 +519,7 @@ public sealed class AppController : IDisposable
     public void Dispose()
     {
         _timer.Stop();
+        _fog?.Close();
         _showWait.Unregister(null);
         _quitWait.Unregister(null);
         _tray.Dispose();

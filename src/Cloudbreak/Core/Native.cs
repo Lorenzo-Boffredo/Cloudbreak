@@ -48,6 +48,52 @@ internal static class Native
         SetWindowLongPtr(h, GWL_EXSTYLE, new IntPtr(cur | flags));
     }
 
+    // ---- Topmost ----
+    [DllImport("user32.dll")]
+    private static extern bool SetWindowPos(IntPtr h, IntPtr after, int x, int y, int cx, int cy, uint flags);
+    private const uint SWP_NOSIZE = 0x1, SWP_NOMOVE = 0x2, SWP_NOACTIVATE = 0x10, SWP_NOOWNERZORDER = 0x200;
+
+    /// <summary>Puts a topmost window back on top of the other topmost windows (the taskbar raises itself when clicked).</summary>
+    public static void BringToTop(Window w)
+    {
+        var h = new WindowInteropHelper(w).Handle;
+        if (h != IntPtr.Zero)
+            SetWindowPos(h, new IntPtr(-1), 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE | SWP_NOOWNERZORDER);
+    }
+
+    /// <summary>Moves and sizes a window in physical pixels and keeps it topmost, without activating it.</summary>
+    public static void PlaceTopmost(Window w, RECT r)
+    {
+        var h = new WindowInteropHelper(w).Handle;
+        if (h != IntPtr.Zero)
+            SetWindowPos(h, new IntPtr(-1), r.Left, r.Top, r.Right - r.Left, r.Bottom - r.Top, SWP_NOACTIVATE | SWP_NOOWNERZORDER);
+    }
+
+    // ---- Monitors ----
+    [StructLayout(LayoutKind.Sequential)]
+    public struct RECT { public int Left, Top, Right, Bottom; }
+    private delegate bool MonitorEnumProc(IntPtr monitor, IntPtr hdc, ref RECT rect, IntPtr data);
+    [DllImport("user32.dll")]
+    private static extern bool EnumDisplayMonitors(IntPtr hdc, IntPtr clip, MonitorEnumProc proc, IntPtr data);
+
+    /// <summary>Every connected screen, in physical pixels (the app is per-monitor DPI aware).</summary>
+    public static System.Collections.Generic.List<RECT> Monitors()
+    {
+        var list = new System.Collections.Generic.List<RECT>();
+        EnumDisplayMonitors(IntPtr.Zero, IntPtr.Zero, (IntPtr _, IntPtr _, ref RECT r, IntPtr _) => { list.Add(r); return true; }, IntPtr.Zero);
+        return list;
+    }
+
+    public const long WS_EX_TRANSPARENT = 0x20;
+    public const int WM_DPICHANGED = 0x02E0;
+
+    public delegate void WinEventProc(IntPtr hook, uint ev, IntPtr hwnd, int idObject, int idChild, uint thread, uint time);
+    [DllImport("user32.dll")]
+    public static extern IntPtr SetWinEventHook(uint evMin, uint evMax, IntPtr hmod, WinEventProc proc, uint pid, uint tid, uint flags);
+    [DllImport("user32.dll")] public static extern bool UnhookWinEvent(IntPtr hook);
+    public const uint EVENT_SYSTEM_FOREGROUND = 0x3;
+    public const uint WINEVENT_OUTOFCONTEXT = 0x0, WINEVENT_SKIPOWNPROCESS = 0x2;
+
     // ---- Misc user32 ----
     [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr hWnd);
     [DllImport("user32.dll")] public static extern bool GetCursorPos(out POINT p);

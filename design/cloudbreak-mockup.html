@@ -293,7 +293,7 @@ button { cursor: pointer; }
     color-mix(in srgb, var(--ink) 6%, var(--mist));
   display: grid; grid-template-rows: 1fr auto;
 }
-.desk-area { height: 250px; padding: 12px; display: flex; flex-direction: column; gap: 8px; align-items: flex-end; justify-content: flex-start; }
+.desk-area { height: 280px; padding: 12px; display: flex; flex-direction: column; gap: 8px; align-items: flex-end; justify-content: flex-start; }
 .desk[data-corner^="b"] .desk-area { justify-content: flex-end; }
 .desk[data-corner$="l"] .desk-area { align-items: flex-start; }
 .toast.brk { background: color-mix(in srgb, var(--vapor-soft) 75%, var(--paper)); }
@@ -413,6 +413,126 @@ button { cursor: pointer; }
 .palette { display: flex; gap: 14px; flex-wrap: wrap; }
 .sw { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--muted); }
 .sw i { width: 22px; height: 22px; border-radius: 6px; border: 1px solid var(--line); }
+
+/* ---------- Break fog: violet mist that gathers in the corners of every screen during a break ---------- */
+.fog-sec { display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 1fr); gap: 36px; align-items: center; }
+.fog-copy { display: grid; gap: 14px; align-content: start; }
+.fog-copy h2 { font-family: var(--f-display); font-weight: 300; font-size: 30px; line-height: 1.1; letter-spacing: -0.02em; margin: 0; }
+.fog-copy p { margin: 0; color: var(--muted); font-size: 14px; max-width: 46ch; }
+.fog-copy .ctl { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.fog-copy .btn { height: 34px; font-size: 13px; }
+.fog-copy .off-note { color: var(--ink); font-size: 13px; }
+@media (max-width: 860px) { .fog-sec { grid-template-columns: 1fr; } }
+
+.scene {
+  --wall-a: #E6E9EF; --wall-b: #CBD0DA;
+  display: flex; align-items: flex-end; justify-content: center; gap: 3%;
+  padding: 28px 20px 18px; border-radius: 12px; border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--ink) 4%, var(--mist));
+  min-height: 300px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .scene { --wall-a: #20232B; --wall-b: #121419; --bezel: #2C2F38; } }
+:root[data-theme="dark"] .scene { --wall-a: #20232B; --wall-b: #121419; --bezel: #2C2F38; }
+.scene.no-fog .fog { display: none; }
+
+.monitor { display: grid; justify-items: center; flex: none; }
+.monitor.one { width: 58%; }
+.monitor.two { width: 37%; }
+.scene[data-screens="1"] .monitor.two { display: none; }
+.scene[data-screens="1"] .monitor.one { width: 72%; }
+.panel { width: 100%; padding: 5px; border-radius: 9px; background: var(--bezel, #1A1C22); box-shadow: 0 14px 30px -16px rgba(0,0,0,.45); }
+.screen { position: relative; aspect-ratio: 16 / 9; border-radius: 5px; overflow: hidden; background: linear-gradient(160deg, var(--wall-a), var(--wall-b)); container-type: inline-size; }
+.monitor.two .screen { aspect-ratio: 16 / 10; }
+.stand { width: 16%; height: 14px; background: var(--bezel, #1A1C22); clip-path: polygon(30% 0, 70% 0, 82% 100%, 18% 100%); }
+.stand + i { display: block; width: 30%; height: 4px; border-radius: 2px; background: var(--bezel, #1A1C22); }
+
+/* Stand-in windows: just enough to show the fog sits on top of whatever you are doing */
+.appwin { position: absolute; left: 14%; top: 11%; width: 58%; height: 64%; border-radius: 4px; background: var(--paper); box-shadow: 0 6px 18px -8px rgba(0,0,0,.35); padding: 3.4cqw 3cqw; display: grid; align-content: start; gap: 1.6cqw; }
+.appwin::before { content: ""; position: absolute; inset: 0 0 auto; height: 2.6cqw; border-bottom: 1px solid var(--line); }
+.appwin i { display: block; height: 1.3cqw; border-radius: 1cqw; background: color-mix(in srgb, var(--ink) 12%, transparent); }
+.appwin i:nth-child(2) { width: 82%; } .appwin i:nth-child(3) { width: 64%; } .appwin i:nth-child(4) { width: 74%; }
+.monitor.two .appwin { left: 22%; top: 16%; width: 56%; height: 58%; }
+.tbar2 { position: absolute; left: 0; right: 0; bottom: 0; height: 6.4%; display: flex; align-items: center; justify-content: center; gap: 1.2cqw; background: color-mix(in srgb, var(--paper) 78%, transparent); border-top: 1px solid color-mix(in srgb, var(--ink) 8%, transparent); }
+.tbar2 > i { width: 2.6cqw; height: 2.6cqw; border-radius: .6cqw; background: color-mix(in srgb, var(--ink) 20%, transparent); }
+.tbar2 .tray { position: absolute; right: 2cqw; display: flex; align-items: center; gap: 1cqw; font-size: 1.7cqw; color: var(--muted); font-variant-numeric: tabular-nums; }
+.tbar2 .tray svg { width: 2.6cqw; height: 2.6cqw; }
+.screen .mini { position: absolute; right: 2.4cqw; bottom: 9.5%; font-size: 2.1cqw; padding: .9cqw 1.9cqw .9cqw 1.5cqw; gap: 1.1cqw; box-shadow: 0 4px 12px -6px rgba(0,0,0,.35); }
+.screen .mini i { width: 1.1cqw; height: 1.1cqw; }
+
+/* The fog itself: a small cloud in each corner of each screen, a cue when the break starts.
+   It fades in (1.2 s), stays about 10 seconds, then fades out (2.4 s). Clicks pass through. */
+/* Fog, not glow: the color is cut by a wispy noise texture (stretched sideways, like mist lying in the air),
+   and that texture is held inside a small area around each corner. Two layers at different scales drift
+   slowly in opposite directions while the fog is visible, so it moves like mist instead of sitting like a stain. */
+.fog {
+  position: absolute; inset: 0; pointer-events: none;
+  --wisp-a: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 360' preserveAspectRatio='none'%3E%3Cfilter id='n' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.012 0.045' numOctaves='4' seed='11'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1.9 -0.4'/%3E%3C/filter%3E%3Crect width='640' height='360' filter='url(%23n)'/%3E%3C/svg%3E");
+  --wisp-b: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 360' preserveAspectRatio='none'%3E%3Cfilter id='n' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.024 0.07' numOctaves='3' seed='29'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1.8 -0.55'/%3E%3C/filter%3E%3Crect width='640' height='360' filter='url(%23n)'/%3E%3C/svg%3E");
+  --fog-tint: color-mix(in srgb, var(--vapor) 88%, transparent);
+  --fog-milk: color-mix(in srgb, color-mix(in srgb, var(--vapor) 45%, #FFFFFF) 85%, transparent);
+}
+.fog { filter: blur(.4cqw); }
+.monitor.two .fog { transform: scaleX(-1); }
+/* Each corner area is not one round shape but three thin ones: a streak along the top or bottom edge,
+   a narrower one along the side edge, and a small core in the corner. Their centers sit just outside the
+   screen, so no circle outline shows: the mist hugs the edges and frays into the screen. */
+.fog .tl { --c1: radial-gradient(19% 6% at 5% -1%, #000, rgba(0,0,0,.6) 45%, transparent 100%);
+           --c2: radial-gradient(4% 16% at -1% 7%, #000, rgba(0,0,0,.6) 45%, transparent 100%);
+           --c3: radial-gradient(7% 10% at -1% -1%, #000, transparent 100%); }
+.fog .tr { --c1: radial-gradient(16% 5.5% at 96% -1%, #000, rgba(0,0,0,.6) 45%, transparent 100%);
+           --c2: radial-gradient(3.5% 14% at 101% 6%, #000, rgba(0,0,0,.6) 45%, transparent 100%);
+           --c3: radial-gradient(6% 9% at 101% -1%, #000, transparent 100%); }
+.fog .bl { --c1: radial-gradient(17% 6% at 6% 101%, #000, rgba(0,0,0,.6) 45%, transparent 100%);
+           --c2: radial-gradient(3.5% 15% at -1% 92%, #000, rgba(0,0,0,.6) 45%, transparent 100%);
+           --c3: radial-gradient(6.5% 9% at -1% 101%, #000, transparent 100%); }
+.fog .br { --c1: radial-gradient(21% 6.5% at 94% 101%, #000, rgba(0,0,0,.6) 45%, transparent 100%);
+           --c2: radial-gradient(4% 17% at 101% 93%, #000, rgba(0,0,0,.6) 45%, transparent 100%);
+           --c3: radial-gradient(7.5% 10% at 101% 101%, #000, transparent 100%); }
+.fog .tl b { transform-origin: 0 0; }
+.fog .tr b { transform-origin: 100% 0; }
+.fog .bl b { transform-origin: 0 100%; }
+.fog .br b { transform-origin: 100% 100%; }
+.fog .c { position: absolute; inset: 0; }
+/* Mask = mist texture ∩ (edge streak ∪ side streak ∪ core). Layers composite bottom-up: the three shapes
+   are added together, then the texture is intersected with them. */
+.fog .c b, .fog .c b::after {
+  position: absolute; inset: 0;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  -webkit-mask-composite: source-in, source-over, source-over, source-over;
+  mask-composite: intersect, add, add, add;
+}
+.fog .c b {
+  background: var(--fog-tint);
+  -webkit-mask-image: var(--wisp-a), var(--c1), var(--c2), var(--c3); mask-image: var(--wisp-a), var(--c1), var(--c2), var(--c3);
+  -webkit-mask-size: 150% 150%, 100% 100%, 100% 100%, 100% 100%; mask-size: 150% 150%, 100% 100%, 100% 100%, 100% 100%;
+  animation: fog-drift-a 14s ease-in-out infinite alternate;
+  transition: opacity 1.2s ease, transform 1.4s cubic-bezier(.2,.7,.2,1);
+}
+.fog .c b::after {
+  content: "";
+  background: var(--fog-milk);
+  -webkit-mask-image: var(--wisp-b), var(--c1), var(--c2), var(--c3); mask-image: var(--wisp-b), var(--c1), var(--c2), var(--c3);
+  -webkit-mask-size: 130% 130%, 100% 100%, 100% 100%, 100% 100%; mask-size: 130% 130%, 100% 100%, 100% 100%, 100% 100%;
+  animation: fog-drift-b 11s ease-in-out infinite alternate;
+}
+@keyframes fog-drift-a { from { -webkit-mask-position: 0% 30%, 0 0, 0 0, 0 0; mask-position: 0% 30%, 0 0, 0 0, 0 0; } to { -webkit-mask-position: 60% 45%, 0 0, 0 0, 0 0; mask-position: 60% 45%, 0 0, 0 0, 0 0; } }
+@keyframes fog-drift-b { from { -webkit-mask-position: 70% 60%, 0 0, 0 0, 0 0; mask-position: 70% 60%, 0 0, 0 0, 0 0; } to { -webkit-mask-position: 15% 40%, 0 0, 0 0, 0 0; mask-position: 15% 40%, 0 0, 0 0, 0 0; } }
+.scene.out .fog .c b { opacity: 0; transform: scale(.85); transition-duration: 2.4s; }
+.scene.out .fog .c b, .scene.out .fog .c b::after { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) {
+  .fog .c b { transition: opacity .6s linear; transform: none !important; }
+  .fog .c b, .fog .c b::after { animation: none; }
+}
+
+/* Tray menu */
+.tmenu { width: 236px; padding: 4px; border-radius: 8px; background: var(--paper); border: 1px solid var(--line); box-shadow: var(--shadow); font-size: 13px; }
+.tmenu button { display: flex; align-items: center; width: 100%; height: 32px; padding: 0 10px 0 30px; border: 0; border-radius: 5px; background: transparent; text-align: left; position: relative; }
+.tmenu button:hover { background: color-mix(in srgb, var(--ink) 6%, transparent); }
+.tmenu button[disabled] { opacity: .4; cursor: default; background: transparent; }
+.tmenu button[role="menuitemcheckbox"] svg { position: absolute; left: 10px; width: 12px; height: 12px; opacity: 0; color: var(--vapor); }
+.tmenu button[aria-checked="true"] svg { opacity: 1; }
+.tmenu hr { border: 0; height: 1px; background: var(--line); margin: 4px 6px; }
+.tmenu-show { display: grid; justify-items: start; gap: 0; padding: 14px; border-radius: 10px; border: 1px solid var(--line); background: color-mix(in srgb, var(--ink) 6%, var(--mist)); }
 
 @media (max-width: 420px) {
   .timer { font-size: 80px; }
@@ -620,6 +740,11 @@ button { cursor: pointer; }
             </div>
             <div class="divider"></div>
             <div class="row">
+              <div class="lbl"><span data-i18n="fog">Break fog</span><small data-i18n="fogDesc">A little violet mist in the corners of every screen when a break starts</small></div>
+              <input type="checkbox" class="switch" id="optFog" role="switch" checked aria-label="Break fog">
+            </div>
+            <div class="divider"></div>
+            <div class="row">
               <div class="lbl"><span data-i18n="sound">Sound</span><small data-i18n="soundDesc">A soft chime when the phase changes. Works with or without notifications.</small></div>
               <input type="checkbox" class="switch" id="optSound" role="switch" checked aria-label="Sound">
             </div>
@@ -715,6 +840,24 @@ button { cursor: pointer; }
         <p class="note" data-i18n="trayNote">The ring is one round: the long arc is the hold, the short one is the break. It fills as time passes and updates once a minute, so it costs nothing.</p>
       </div>
 
+      <div>
+        <h2 data-i18n="menuTitle">Tray menu</h2>
+        <div class="tmenu-show">
+          <div class="tmenu" role="menu" aria-label="Cloudbreak">
+            <button role="menuitem" data-i18n="pause">Pause</button>
+            <button role="menuitem" data-i18n="skipBreak" disabled>Skip break</button>
+            <button role="menuitem" data-i18n="stop">Stop</button>
+            <hr>
+            <button role="menuitem" data-i18n="openApp">Open Cloudbreak</button>
+            <button role="menuitemcheckbox" id="menuMini" aria-checked="true"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 6.4l2.6 2.4L10 3.2"/></svg><span data-i18n="mini">Mini timer</span></button>
+            <button role="menuitem" data-i18n="settings">Settings</button>
+            <hr>
+            <button role="menuitem" data-i18n="quit">Quit</button>
+          </div>
+        </div>
+        <p class="note" data-i18n="menuNote">Right-click the tray icon. Mini timer shows or hides the chip, same as the switch in Settings.</p>
+      </div>
+
       <div id="miniWrap">
         <h2 data-i18n="mini">Mini timer</h2>
         <div class="mini-desk" id="miniDesk">
@@ -731,6 +874,45 @@ button { cursor: pointer; }
           <span class="sw"><i style="background:var(--mist)"></i><span data-i18n="cMist">Mist</span></span>
         </div>
         <p class="note" data-i18n="colorNote">Holds stay in black and white. The only color in the app is your break.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Break fog -->
+  <section class="fog-sec" aria-label="Break fog">
+    <div class="fog-copy">
+      <h2 data-i18n="fog">Break fog</h2>
+      <p data-i18n="fogNote">When a break starts, a little violet mist appears in the corners of every screen you have connected. It stays about 10 seconds, then fades away. Clicks pass straight through it.</p>
+      <div class="ctl">
+        <span class="seg-ctl" role="group" aria-label="Screens" id="screensCtl">
+          <button data-screens="1" aria-pressed="false" data-i18n="oneScreen">One screen</button>
+          <button data-screens="2" aria-pressed="true" data-i18n="twoScreens">Two screens</button>
+        </span>
+        <button class="btn" id="playFog" data-i18n="playFog">Play a break</button>
+      </div>
+      <p class="note" id="fogStatus"></p>
+      <p class="off-note" id="fogOff" data-i18n="fogOff" hidden>Break fog is off in Settings.</p>
+    </div>
+
+    <div class="scene" id="scene" data-screens="2">
+      <div class="monitor one">
+        <div class="panel"><div class="screen">
+          <div class="appwin"><i></i><i></i><i></i><i></i></div>
+          <div class="mini break fog-mini"><i></i><b class="fog-time">04:56</b><span data-i18n="break">Break</span></div>
+          <div class="tbar2"><i></i><i></i><i></i><i></i><i></i>
+            <span class="tray"><svg class="ring" data-ring viewBox="0 0 32 32" aria-hidden="true"></svg><span class="fog-clock">14:43</span></span>
+          </div>
+          <div class="fog" aria-hidden="true"><span class="c tl"><b></b></span><span class="c tr"><b></b></span><span class="c bl"><b></b></span><span class="c br"><b></b></span></div>
+        </div></div>
+        <div class="stand"></div><i></i>
+      </div>
+      <div class="monitor two">
+        <div class="panel"><div class="screen">
+          <div class="appwin"><i></i><i></i><i></i></div>
+          <div class="tbar2"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="fog" aria-hidden="true"><span class="c tl"><b></b></span><span class="c tr"><b></b></span><span class="c bl"><b></b></span><span class="c br"><b></b></span></div>
+        </div></div>
+        <div class="stand"></div><i></i>
       </div>
     </div>
   </section>
@@ -781,7 +963,7 @@ button { cursor: pointer; }
       tBreak: (m, t) => `You can vape for ${m} minute${m === 1 ? '' : 's'}. Next hold starts at ${t}.`,
       tHold: (m, t) => `Hold for ${m} minutes, until ${t}.`,
       notifNote: 'Cloudbreak draws its own notifications, only during your active hours. They show up on your main screen, in the corner you pick in Settings, and close by themselves after a few seconds. The icon next to the clock opens the app.',
-      miniNote: 'One small chip with the time left. It stays above other windows and turns violet during a break. Drag it anywhere on the screen (try it here). It remembers where you left it, and a double-click opens Cloudbreak.',
+      miniNote: 'One small chip with the time left. It stays above other windows and turns violet during a break. Drag it anywhere on the screen (try it here). It remembers where you left it, and a double-click opens Cloudbreak. Outside your active hours it hides, unless you start a session yourself.',
       colors: 'Colors', cInk: 'Ink, for holds', cVapor: 'Vapor, for breaks', cMist: 'Mist',
       colorNote: 'Holds stay in black and white. The only color in the app is your break.',
       appIconTitle: 'App icon',
@@ -790,6 +972,13 @@ button { cursor: pointer; }
       trayNote: 'The ring is one round: the long arc is the hold, the short one is the break. It fills as time passes and updates once a minute, so it costs nothing.',
       thAuto: 'Auto', thLight: 'Light', thDark: 'Dark',
       pin: 'Keep on top', minimize: 'Minimize', closeTray: 'Close to tray', close: 'Close',
+      fog: 'Break fog', fogDesc: 'A little violet mist in the corners of every screen when a break starts',
+      fogNote: 'When a break starts, a little violet mist appears in the corners of every screen you have connected. It stays about 10 seconds, then fades away. Clicks pass straight through it.',
+      fogSoon: 'The hold ends in a moment…', fogLeft: (s) => `The fog fades in ${s} s.`, fogGone: 'Gone. The break goes on; the mini timer stays violet.',
+      oneScreen: 'One screen', twoScreens: 'Two screens', playFog: 'Play a break', playAgain: 'Play again',
+      fogOff: 'Break fog is off in Settings.',
+      menuTitle: 'Tray menu', openApp: 'Open Cloudbreak', quit: 'Quit',
+      menuNote: 'Right-click the tray icon. Mini timer shows or hides the chip, like the switch in Settings.',
     },
     it: {
       h1: 'Venticinque minuti senza. Cinque minuti con.',
@@ -829,7 +1018,7 @@ button { cursor: pointer; }
       tBreak: (m, t) => `Puoi svapare per ${m} minut${m === 1 ? 'o' : 'i'}. Si riprende alle ${t}.`,
       tHold: (m, t) => `Resisti ${m} minuti, fino alle ${t}.`,
       notifNote: "Cloudbreak usa notifiche sue, solo negli orari attivi. Compaiono sullo schermo principale, nell'angolo che scegli nelle impostazioni, e si chiudono da sole dopo qualche secondo. L'icona accanto all'orologio apre l'app.",
-      miniNote: "Una sola chip con il tempo rimanente. Resta sopra le altre finestre e diventa viola durante la pausa. Trascinala dove vuoi sullo schermo (provalo qui). Ricorda dove l'hai lasciata, e con un doppio clic apri Cloudbreak.",
+      miniNote: "Una sola chip con il tempo rimanente. Resta sopra le altre finestre e diventa viola durante la pausa. Trascinala dove vuoi sullo schermo (provalo qui). Ricorda dove l'hai lasciata, e con un doppio clic apri Cloudbreak. Fuori dagli orari attivi si nasconde, a meno che tu non avvii una sessione a mano.",
       colors: 'Colori', cInk: 'Inchiostro, per resistere', cVapor: 'Vapore, per le pause', cMist: 'Nebbia',
       colorNote: "Mentre resisti tutto resta in bianco e nero. L'unico colore dell'app è la pausa.",
       appIconTitle: "Icona dell'app",
@@ -838,6 +1027,13 @@ button { cursor: pointer; }
       trayNote: "L'anello è un giro: l'arco lungo è il tempo in cui resisti, quello corto è la pausa. Si riempie con il passare del tempo e si aggiorna una volta al minuto, quindi non consuma niente.",
       thAuto: 'Auto', thLight: 'Chiaro', thDark: 'Scuro',
       pin: 'Sempre in primo piano', minimize: 'Riduci a icona', closeTray: "Chiudi nell'area di notifica", close: 'Chiudi',
+      fog: 'Nebbia della pausa', fogDesc: 'Una nebbiolina viola agli angoli di ogni schermo quando inizia la pausa',
+      fogNote: "Quando inizia la pausa, una nebbiolina viola compare agli angoli di ogni schermo collegato. Resta una decina di secondi, poi sfuma via. I clic ci passano attraverso.",
+      fogSoon: 'Tra un attimo inizia la pausa…', fogLeft: (s) => `La nebbia sparisce tra ${s} s.`, fogGone: 'Sparita. La pausa continua, il mini timer resta viola.',
+      oneScreen: 'Uno schermo', twoScreens: 'Due schermi', playFog: 'Guarda una pausa', playAgain: 'Guarda di nuovo',
+      fogOff: 'La nebbia è disattivata nelle impostazioni.',
+      menuTitle: "Menu dell'icona", openApp: 'Apri Cloudbreak', quit: 'Esci',
+      menuNote: "Clic destro sull'icona accanto all'orologio. Mini timer mostra o nasconde la chip, come l'interruttore nelle impostazioni.",
     },
   };
   const sysLang = () => ((navigator.languages && navigator.languages[0]) || navigator.language || 'en').toLowerCase().startsWith('it') ? 'it' : 'en';
@@ -1026,6 +1222,11 @@ button { cursor: pointer; }
     renderRings(c);
     $('miniLabel').textContent = name;
     $('miniWrap').hidden = !$('optMini').checked;
+    $('menuMini').setAttribute('aria-checked', String($('optMini').checked));
+    const mi = document.querySelectorAll('.tmenu button');
+    mi[0].textContent = $('primaryBtn').textContent;
+    mi[1].disabled = !(c && phase === 'break');
+    mi[2].hidden = !c;
 
     renderStrip();
   }
@@ -1172,7 +1373,57 @@ button { cursor: pointer; }
   $('endPlus').addEventListener('click', () => { S.aEnd = shift(S.aEnd, 30); render(); });
   $('optNotify').addEventListener('change', render);
 
+  // Tray menu: the Mini timer item and the Settings switch are the same setting
+  $('menuMini').addEventListener('click', () => { $('optMini').checked = !$('optMini').checked; render(); });
+
+  /* ---------- Break fog demo ----------
+     At rest it shows the first seconds of a break, fog visible. "Play" runs the last 3 seconds of a hold,
+     then the break starts in real time: the fog appears in the corners, stays 10 seconds and fades away. */
+  const CUE = 10;
+  const F = { phase: 'break', left: 296, total: 300, cue: 6, playing: false, clock: 14 * 3600 + 43 * 60 };
+  const scene = $('scene');
+  function renderFog() {
+    const shown = F.phase === 'break' && F.cue > 0;
+    scene.classList.toggle('out', !shown);
+    scene.querySelectorAll('.fog-mini').forEach(m => { m.className = 'mini fog-mini ' + F.phase; m.lastElementChild.textContent = L[F.phase]; });
+    scene.querySelectorAll('.fog-time').forEach(t => { t.textContent = dur(F.left); });
+    scene.querySelectorAll('.fog-clock').forEach(t => { t.textContent = tod(F.clock); });
+    $('fogStatus').textContent = !F.playing ? ''
+      : F.phase === 'hold' ? L.fogSoon
+      : shown ? L.fogLeft(Math.ceil(F.cue))
+      : L.fogGone;
+    $('playFog').textContent = F.playing ? L.playAgain : L.playFog;
+    const on = $('optFog').checked;
+    scene.classList.toggle('no-fog', !on);
+    $('fogOff').hidden = on;
+  }
+  let fogTimer = null;
+  $('playFog').addEventListener('click', () => {
+    clearInterval(fogTimer);
+    F.phase = 'hold'; F.left = 3; F.cue = 0; F.playing = true;
+    renderFog();
+    let last = performance.now();
+    fogTimer = setInterval(() => {
+      const t = performance.now(), dt = (t - last) / 1000; last = t;
+      F.left -= dt; F.clock += dt;
+      if (F.phase === 'break') F.cue = Math.max(0, F.cue - dt);
+      if (F.left <= 0) {
+        if (F.phase === 'hold') { F.phase = 'break'; F.left = F.total; F.cue = CUE; }
+        else { F.phase = 'hold'; F.left = 25 * 60; }
+      }
+      renderFog();
+    }, 250);
+  });
+  document.querySelectorAll('[data-screens]').forEach(b => b.addEventListener('click', () => {
+    if (!b.matches('button')) return;
+    scene.dataset.screens = b.dataset.screens;
+    document.querySelectorAll('#screensCtl button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+  }));
+  $('optFog').addEventListener('change', renderFog);
+  document.querySelectorAll('#langSeg button').forEach(b => b.addEventListener('click', renderFog));
+
   applyLang();
   render();
+  renderFog();
 })();
 </script>

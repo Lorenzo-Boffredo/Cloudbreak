@@ -240,6 +240,17 @@
                         <Border Style="{StaticResource Divider}"/>
 
                         <DockPanel Style="{StaticResource Row}">
+                            <CheckBox x:Name="FogOn" DockPanel.Dock="Right" Style="{StaticResource Switch}" Click="Toggle_Click"
+                                      AutomationProperties.Name="{c:T fog}"/>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="{c:T fog}"/>
+                                <TextBlock Text="{c:T fogDesc}" Style="{StaticResource Desc}"/>
+                            </StackPanel>
+                        </DockPanel>
+
+                        <Border Style="{StaticResource Divider}"/>
+
+                        <DockPanel Style="{StaticResource Row}">
                             <CheckBox x:Name="SoundOn" DockPanel.Dock="Right" Style="{StaticResource Switch}" Click="Toggle_Click"
                                       AutomationProperties.Name="{c:T sound}"/>
                             <StackPanel VerticalAlignment="Center">
