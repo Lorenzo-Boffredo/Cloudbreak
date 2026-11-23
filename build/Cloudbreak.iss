@@ -4,7 +4,7 @@
 ; Build: build\build.ps1  (output goes to the Setup folder)
 
 #define AppName "Cloudbreak"
-#define AppVersion "1.1.0"
+#define AppVersion "1.1.1"
 #define AppExe "Cloudbreak.exe"
 #define SrcDir "..\publish"
 

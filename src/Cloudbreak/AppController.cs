@@ -108,7 +108,7 @@ public sealed class AppController : IDisposable
         if (open == "alerts") { ShowSettings(); _settings!.NavAlerts.IsChecked = true; }
         if (open == "startstop")
         {
-            // =startstop presses Start after 3 s and Stop after 6 s, to test what follows a session started by hand.
+            // =startstop presses Start after 3 s and Stop after 6 s, to test what happens around a session.
             var t = new DispatcherTimer { Interval = TimeSpan.FromSeconds(3) };
             int n = 0;
             t.Tick += (_, _) => { if (++n == 1) PrimaryAction(); else { t.Stop(); StopLoop(); } };
@@ -323,12 +323,12 @@ public sealed class AppController : IDisposable
     }
 
     /// <summary>
-    /// The chip shows when it is on in Settings, except while Cloudbreak waits outside the active hours.
-    /// A session started by hand outside the hours is running, not waiting, so the chip comes back for it.
+    /// The chip shows when it is on in Settings and a session is going (running or paused).
+    /// When the timer is stopped, or waits outside the active hours, there is nothing to count: it hides.
     /// </summary>
     private void SyncMini()
     {
-        if (S.MiniTimer && Engine.State != RunState.OffHours) ShowMini();
+        if (S.MiniTimer && Engine.IsActive) ShowMini();
         else if (_mini != null)
         {
             var m = _mini;

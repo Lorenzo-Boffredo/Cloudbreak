@@ -69,7 +69,7 @@ You can also get a **notification** in the corner you pick and a **soft chime**.
 - **Your rhythm.** Pick the hold and break lengths, or use a preset: 25/5, 45/5, 60/10, 90/10.
 - **Active hours.** Outside them Cloudbreak waits, then starts again on its own.
 - **Starts with Windows** and lives next to the clock. The tray ring fills as the round goes by.
-- **Mini timer.** A small always-on-top chip with the time left. Drag it anywhere, even onto the taskbar. It hides outside your active hours, unless you start a session yourself. Turn it on or off from the tray menu.
+- **Mini timer.** A small always-on-top chip with the time left. Drag it anywhere, even onto the taskbar. It shows only while a session is going: when you stop the timer, or Cloudbreak waits outside your active hours, it hides. Turn it on or off from the tray menu.
 - **Today's numbers.** Rounds completed, vape-free time, breaks skipped. Paused time never counts.
 - **Fits your Windows.** Light or dark theme, violet or your Windows accent color, English or Italian.
 
@@ -149,7 +149,7 @@ Cloudbreak è un timer pomodoro per svapare meno, per Windows. Lo avvii una volt
 
 All'inizio della pausa una nebbiolina viola compare per una decina di secondi agli angoli di ogni schermo collegato. Puoi avere anche una notifica nell'angolo che scegli e un rintocco: nebbia, notifica e suono si accendono e si spengono ognuno per conto suo.
 
-Il mini timer resta sopra le altre finestre e puoi trascinarlo dove vuoi, anche sulla barra di Windows. Fuori dagli orari attivi si nasconde, a meno che tu non avvii una sessione a mano.
+Il mini timer resta sopra le altre finestre e puoi trascinarlo dove vuoi, anche sulla barra di Windows. Si vede solo mentre una sessione è in corso: quando fermi il timer, o fuori dagli orari attivi, si nasconde.
 
 **Installazione**
 
